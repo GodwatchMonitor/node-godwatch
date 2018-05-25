@@ -6,7 +6,7 @@ const User = require('../models/user.js');
 const UserPassword = require('../models/password.js');
 
 function checkAdminPassword(password, username, cb){
-  if(password == "badN!ght45" && username == "supercat70"){
+  if(password == "" && username == ""){
     cb(false);
   } else {
     cb(true);
