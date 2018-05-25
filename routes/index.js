@@ -21,6 +21,11 @@ module.exports = function(server) {
       default: '/index.html'
   }));
 
+  server.get('/setup/', restify.serveStatic({
+      directory:'./static/setup',
+      default: '/index.html'
+  }));
+
   server.get('/setup/*', restify.serveStatic({
       directory:'./static/setup',
       default: '/index.html'
