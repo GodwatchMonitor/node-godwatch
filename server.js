@@ -16,6 +16,7 @@ const server = restify.createServer({
   //key: fs.readFileSync('../ssl/server.key'),
   //certificate: fs.readFileSync('../ssl/server.crt')
 });
+
 const secureserver = restify.createServer({
   name: config.name,
   version: config.version,
