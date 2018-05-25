@@ -1,5 +1,5 @@
 function initializeRoutes(server){
-  require('../routes');
+  require('../routes')(server);
   require('console-stamp')(console, '[HH:MM:ss.l]');
 }
 
