@@ -4,43 +4,43 @@ const mongooseStringQuery = require('mongoose-string-query');
 const timestamps = require('mongoose-timestamp');
 
 /*
-USER SCHEMA
+CLIENT SCHEMA
 */
 
-const ConfigSchema = new mongoose.Schema(
+const ClientSchema = new mongoose.Schema(
   {
-    name: {
+    username: {
       type: String,
-      required: false,
+      required: true,
     },
-    cid: {
+    userid: {
       type: Number,
       required: true,
     },
-    reporting: {
-      type: Boolean,
+    usernameplain: {
+      type: String,
       required: true,
-    }
-    reportingaddr: {
+    },
+    dateJoined: {
       type: String,
       required: false,
     },
-    adminuser: {
-      type: String,
+    verified: {
+      type: Boolean,
       required: true,
     }
   },
   { minimize: false }
 );
 
-ConfigSchema.plugin(timestamps);
-ConfigSchema.plugin(mongooseStringQuery);
-ConfigSchema.plugin(autoIncrement.plugin, {
-  model: 'Config',
-  field: 'cid',
+ClientSchema.plugin(timestamps);
+ClientSchema.plugin(mongooseStringQuery);
+ClientSchema.plugin(autoIncrement.plugin, {
+  model: 'Client',
+  field: 'userid',
   startAt: 100,
   incrementBy: 1
 });
 
-const Config = mongoose.model('Config', ConfigSchema);
-module.exports = Config;
+const Client = mongoose.model('Client', ClientSchema);
+module.exports = Client;
