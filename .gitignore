@@ -1,0 +1,5 @@
+# Exclude Database
+db/*
+
+# Keep .gitkeep
+!db/.gitkeep
