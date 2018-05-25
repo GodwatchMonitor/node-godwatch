@@ -12,14 +12,14 @@ const route66 = require('./nodule/route-66');
 const server = restify.createServer({
   name: config.name,
   version: config.version,
-  handleUncaughtExceptions: true,
+  //handleUncaughtExceptions: true,
   //key: fs.readFileSync('../ssl/server.key'),
   //certificate: fs.readFileSync('../ssl/server.crt')
 });
 const secureserver = restify.createServer({
   name: config.name,
   version: config.version,
-  handleUncaughtExceptions: true,
+  //handleUncaughtExceptions: true,
   //key: fs.readFileSync('../ssl/server.key'),
   //certificate: fs.readFileSync('../ssl/server.crt')
 });
@@ -41,7 +41,7 @@ secureserver.use(restifyPlugins.authorizationParser());
 server.listen(config.port, () => {
   //connect to mongodb
   mongoose.Promise = global.Promise;
-  mongoose.connect(config.db.uri, { useMongoClient: true });
+  mongoose.connect(config.db.uri);
   autoIncrement.initialize(mongoose.connection);
 
   const db = mongoose.connection;
@@ -61,7 +61,7 @@ server.listen(config.port, () => {
 secureserver.listen('7002', () => {
   //connect to mongodb
   mongoose.Promise = global.Promise;
-  mongoose.connect(config.db.uri, { useMongoClient: true });
+  mongoose.connect(config.db.uri);
   autoIncrement.initialize(mongoose.connection);
 
   const db = mongoose.connection;
