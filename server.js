@@ -6,7 +6,9 @@ const restifyCookies = require('restify-cookies');
 const mongoose = require('mongoose');
 const autoIncrement = require('mongoose-auto-increment');
 const fs = require('fs');
+const figlet = require('figlet')
 const route66 = require('./nodule/route-66');
+const innerAuth = require('./nodule/inner-auth');
 
 // Init Server
 const server = restify.createServer({
@@ -38,6 +40,19 @@ secureserver.use(restifyPlugins.queryParser({ mapParams: true }));
 secureserver.use(restifyPlugins.fullResponse());
 secureserver.use(restifyPlugins.authorizationParser());
 
+figlet.text('\nnode-godwatch\n', {
+    font: 'Doom',
+    horizontalLayout: 'default',
+    verticalLayout: 'default'
+}, function(err, data) {
+    if (err) {
+        console.log('Something went wrong...');
+        console.dir(err);
+        return;
+    }
+    console.log(data);
+});
+
 // Start Server, Connect to DB and Require Routes
 server.listen(config.port, () => {
   //connect to mongodb
@@ -53,28 +68,39 @@ server.listen(config.port, () => {
   });
 
   db.once('open', () => {
+
     route66.initializeRoutes(server);
-    console.log('Server is listening on port 7001');
-  });
 
-});
+    innerAuth.checkSetup(function(err){
 
-secureserver.listen('7002', () => {
-  //connect to mongodb
-  mongoose.Promise = global.Promise;
-  mongoose.connect(config.db.uri);
-  autoIncrement.initialize(mongoose.connection);
+      if(!err){
+        
+        console.log('Server is listening on port ' + config.port);
 
-  const db = mongoose.connection;
+        secureserver.listen(String(Number(config.port) + 1), () => {
+          //connect to mongodb
+          mongoose.Promise = global.Promise;
+          mongoose.connect(config.db.uri);
+          autoIncrement.initialize(mongoose.connection);
 
-  db.on('error', (err) => {
-    console.error(err);
-    process.exit(1);
-  });
+          const db = mongoose.connection;
 
-  db.once('open', () => {
-    route66.initializeRoutes(secureserver);
-    console.log('Secure Server is listening on port 7002');
+          db.on('error', (err) => {
+            console.error(err);
+            process.exit(1);
+          });
+
+          db.once('open', () => {
+            route66.initializeRoutes(secureserver);
+            console.log('Secure Server is listening on port ' + String(Number(config.port) + 1));
+          });
+
+        });
+
+      }
+
+    });
+
   });
 
 });

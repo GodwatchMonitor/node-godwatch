@@ -1,16 +1,32 @@
 const errors = require('restify-errors');
 const restify = require('restify-plugins');
 const mongoose = require('mongoose');
+const prompt = require('readline-sync');
 
-const User = require('../models/user.js');
-const UserPassword = require('../models/password.js');
+const MainConf = require('../models/mainconf');
 
 function checkAdminPassword(password, username, cb){
-  if(password == "" && username == ""){
-    cb(false);
-  } else {
-    cb(true);
-  }
+
+  MainConf.findOne({ blip: 1 }, function(err, doc) {
+    if(err){
+      console.error(err);
+      return next(
+        new errors.InvalidContentError(err.errors.name.message)
+      );
+    }
+
+    if(doc != null){ //does exist
+      if(password == doc.password && username == doc.username){
+        cb(false);
+      } else {
+        cb(true);
+      }
+    } else {
+      cb(true);
+    }
+
+  });
+
 }
 
 const userAuth = function(req, res, next){
@@ -84,4 +100,44 @@ const adminAuth = function(req, res, next){
   });
 };
 
-module.exports = {userAuth, adminAuth}
+const checkSetup = function(cb){
+
+  MainConf.findOne({ blip: 1 }, function(err, doc) {
+    if(err){
+      console.error(err);
+      return next(
+        new errors.InvalidContentError(err.errors.name.message)
+      );
+    }
+
+    if(doc == null){ //does not exist
+
+      console.log('No configuration found, running config...\n');
+      var userName = prompt.question('----------------------     Username: ');
+      var passWord = prompt.question('----------------------     Password: ', { hideEchoBack: true });
+      var passWord2 = prompt.question('----------------------     Confirm Password: ', { hideEchoBack: true });
+
+      while(passWord != passWord2){
+        console.log("----------------------     Passwords do not match, try again");
+        var passWord = prompt.question('----------------------     Password: ', { hideEchoBack: true });
+        var passWord2 = prompt.question('----------------------     Confirm Password: ', { hideEchoBack: true });
+      }
+
+      let newMConf = new MainConf(
+        {
+          blip: 1,
+          username: userName,
+          password: passWord
+        }
+      );
+      console.log(newMConf);
+
+      cb(null);
+
+    }
+
+  });
+
+}
+
+module.exports = {userAuth, adminAuth, checkSetup}

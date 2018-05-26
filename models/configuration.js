@@ -3,6 +3,9 @@ const autoIncrement = require('mongoose-auto-increment');
 const mongooseStringQuery = require('mongoose-string-query');
 const timestamps = require('mongoose-timestamp');
 
+const Client = require('../models/client');
+const Recipient = require('../models/recipient');
+
 /*
 CONFIG SCHEMA
 */
@@ -21,13 +24,11 @@ const ConfigSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
-    adminuser: {
-      type: String,
-      required: true,
+    clients: {
+      type: [Client.ObjectId],
     },
-    adminpass: {
-      type: String,
-      required: true,
+    recipients: {
+      type: [Recipient.ObjectId],
     }
   },
   { minimize: false }
