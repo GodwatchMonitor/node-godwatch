@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const randomstring = require('randomstring');
 const qs = require('qs');
 
+const Config = require('../models/configuration');
+
 //Nodules
 const innerAuth = require('../nodule/inner-auth');
 const sysMail = require('../nodule/sys-mail');
@@ -35,7 +37,7 @@ module.exports = function(server) {
       default: '/index.html'
   }));
 
-  server.put('/config', function(res, req, next){
+  server.post('/setup/', (req, res, next) => {
 
     if(!req.is('application/x-www-form-urlencoded')){
       return next(
@@ -45,8 +47,36 @@ module.exports = function(server) {
 
     let data = qs.parse(req.body) || {};
 
-    res.send(data);
+    let newConfig = new Config(data);
+    newConfig.reporting = false;
+    newConfig.save(function(err){
 
+      if(err){
+        console.error(err);
+        return next(new errors.InternalError(err.message));
+        next();
+      }
+
+      res.send(201, newConfig);
+      next();
+
+    });
+
+  });
+
+  // LIST
+  server.get('/config', (req, res, next) => {
+    Config.apiQuery(req.params, function(err, docs){
+      if(err){
+        console.error(err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      res.send(docs);
+      next();
+    });
   });
 
 };

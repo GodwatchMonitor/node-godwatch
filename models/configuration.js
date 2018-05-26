@@ -4,15 +4,11 @@ const mongooseStringQuery = require('mongoose-string-query');
 const timestamps = require('mongoose-timestamp');
 
 /*
-USER SCHEMA
+CONFIG SCHEMA
 */
 
 const ConfigSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: false,
-    },
     cid: {
       type: Number,
       required: true,
@@ -20,12 +16,16 @@ const ConfigSchema = new mongoose.Schema(
     reporting: {
       type: Boolean,
       required: true,
-    }
+    },
     reportingaddr: {
       type: String,
       required: false,
     },
     adminuser: {
+      type: String,
+      required: true,
+    },
+    adminpass: {
       type: String,
       required: true,
     }
@@ -38,7 +38,7 @@ ConfigSchema.plugin(mongooseStringQuery);
 ConfigSchema.plugin(autoIncrement.plugin, {
   model: 'Config',
   field: 'cid',
-  startAt: 100,
+  startAt: 0,
   incrementBy: 1
 });
 
