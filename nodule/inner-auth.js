@@ -130,10 +130,24 @@ const checkSetup = function(cb){
           password: passWord
         }
       );
-      console.log(newMConf);
 
+      newMConf.save(function(err){
+
+        if(err){
+          console.error(err);
+          return next(new errors.InternalError(err.message));
+          next();
+        }
+
+        console.log("Configuration set, please note username and password below as they will not be shown again.");
+        console.log(newMConf);
+
+        cb(null);
+        
+      });
+
+    } else {
       cb(null);
-
     }
 
   });
