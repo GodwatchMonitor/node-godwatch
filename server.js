@@ -5,6 +5,7 @@ const restifyPlugins = require('restify-plugins');
 const restifyCookies = require('restify-cookies');
 const mongoose = require('mongoose');
 const autoIncrement = require('mongoose-auto-increment');
+autoIncrement.initialize(mongoose.connection);
 const fs = require('fs');
 const figlet = require('figlet')
 const route66 = require('./nodule/route-66');
@@ -74,7 +75,7 @@ server.listen(config.port, () => {
     innerAuth.checkSetup(function(err){
 
       if(!err){
-        
+
         console.log('Server is listening on port ' + config.port);
 
         secureserver.listen(String(Number(config.port) + 1), () => {

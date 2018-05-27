@@ -14,7 +14,7 @@ const RecipientSchema = new mongoose.Schema(
       required: true,
     },
     address: {
-      type: Number,
+      type: String,
       required: true,
     },
     rid: {
@@ -31,7 +31,7 @@ RecipientSchema.plugin(autoIncrement.plugin, {
   model: 'Recipient',
   field: 'rid',
   startAt: 100,
-  incrementBy: 1
+  incrementBy: 1,
 });
 
 const Recipient = mongoose.model('Recipient', RecipientSchema);

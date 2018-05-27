@@ -25,11 +25,17 @@ const ConfigSchema = new mongoose.Schema(
       required: false,
     },
     clients: {
-      type: [Client.ObjectId],
+      type: [Number],
     },
     recipients: {
-      type: [Recipient.ObjectId],
-    }
+      type: [Number],
+    },
+    mailhost: { type: String },
+    mailport: { type: Number },
+    securemail: { type: Boolean },
+    mailuser: { type: String },
+    mailpass: { type: String },
+    mailRejectUnauthorized: { type: Boolean }
   },
   { minimize: false }
 );

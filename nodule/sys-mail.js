@@ -1,35 +1,69 @@
 const nodemailer = require('nodemailer');
 const errors = require('restify-errors');
 
-const transporter = nodemailer.createTransport({
-  host: '',
-  port: 465,
-  secureConnection: true,
-  auth: {
-    user: '',
-    pass: ''
-  },
-  tls: {
-    rejectUnauthorized: false
-  }
-});
+const Config = require('../models/configuration');
+const MainConf = require('../models/mainconf');
+const Recipient = require('../models/recipient');
 
-function sendVerificationEmail(user, secrets){
-  var mailOptions = {
-    from: '"Samusoidal Games" <info@samusoidal.com>',
-    to: secrets.email,
-    subject: 'Verify your Samusoidal account',
-    text: '',
-    html: ``
+function sendAlert(id, mess){
 
-  };
-
-  transporter.sendMail(mailOptions, function(err, info){
+  Recipient.findOne({ rid: id }, function(err, doc){
     if(err){
-      return console.log(err);
+      console.error(err);
+      return next(
+        new errors.InvalidContentError(err.errors.name.message)
+      );
     }
-    console.log('User Verification Sent: ' + info.response + ' | User: ' + user.username);
+
+    MainConf.findOne({ blip: 1 }, function(err, mc) {
+      if(err){
+        console.error(err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      Config.findOne({ cid: mc.currentconfig }, function(err, configuration) {
+        if(err){
+          console.error(err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        }
+
+        var mailOptions = {
+          from: configuration.mailuser,
+          to: doc.address,
+          subject: 'TEST',
+          text: mess,
+        };
+
+        var transporter = nodemailer.createTransport({
+          host: configuration.mailhost,
+          port: configuration.mailport,
+          secureConnection: configuration.securemail,
+          auth: {
+            user: configuration.mailuser,
+            pass: configuration.mailpass
+          },
+          tls: {
+            rejectUnauthorized: configuration.mailRejectUnauthorized
+          }
+        });
+
+        transporter.sendMail(mailOptions, function(err, info){
+          if(err){
+            return console.log(err);
+          }
+          console.log('Alert Sent to ' + doc.address + ': ' + info.response + ' | Message: ' + mess);
+        });
+
+      });
+
+    });
+
   });
+
 }
 
-module.exports = {sendVerificationEmail}
+module.exports = {sendAlert}

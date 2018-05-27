@@ -3,7 +3,11 @@ const restify = require('restify-plugins');
 const mongoose = require('mongoose');
 const prompt = require('readline-sync');
 
+const sysMail = require('../nodule/sys-mail');
+
+const autoIncrement = require('mongoose-auto-increment');
 const MainConf = require('../models/mainconf');
+const Config = require('../models/configuration');
 
 function checkAdminPassword(password, username, cb){
 
@@ -127,11 +131,61 @@ const checkSetup = function(cb){
         {
           blip: 1,
           username: userName,
-          password: passWord
+          password: passWord,
+          //currentconfig: 0
         }
       );
 
-      newMConf.save(function(err){
+      console.log('Running default email config...\n');
+
+      var inMailhost = "";
+      var inMailport = "";
+      inMailhost = prompt.question('----------------------     Email Server: ');
+      inMailport = prompt.question('----------------------     Email Port: ');
+
+      var boolval = true;
+
+      var inSecuremail = "";
+      while(typeof inSecuremail != typeof boolval){
+        inSecuremail = prompt.question('----------------------     SSL/TLS (y/n): ');
+        console.log(inSecuremail);
+        console.log(typeof inSecuremail);
+        if(inSecuremail == "y"){
+          inSecuremail = true;
+          console.log(typeof inSecuremail);
+        } else if(inSecuremail == "n") {
+          inSecuremail = false;
+        }
+      }
+
+      var inMailuser = "";
+      var inMailpass = "";
+      inMailuser = prompt.question('----------------------     Email Address: ');
+      inMailpass = prompt.question('----------------------     Email Password: ', { hideEchoBack: true });
+
+      var inMailRejectUnauthorized = "";
+      while(typeof inMailRejectUnauthorized != typeof boolval){
+        inMailRejectUnauthorized = prompt.question('----------------------     MailRejectUnauthorized (y/n): ');
+        if(inMailRejectUnauthorized == "y"){
+          inMailRejectUnauthorized = true;
+        } else if(inMailRejectUnauthorized == "n") {
+          inMailRejectUnauthorized = false;
+        }
+      }
+
+      let newConf = new Config(
+        {
+          reporting: false,
+          mailhost: inMailhost,
+          mailport: inMailport,
+          securemail: inSecuremail,
+          mailuser: inMailuser,
+          mailpass: inMailpass,
+          mailRejectUnauthorized: inMailRejectUnauthorized,
+        }
+      );
+
+      newConf.save(function(err){
 
         if(err){
           console.error(err);
@@ -139,14 +193,21 @@ const checkSetup = function(cb){
           next();
         }
 
-        console.log("Configuration set, please note username and password below as they will not be shown again.");
-        console.log(newMConf);
+        newMConf.currentconfig = newConf.cid;
 
-        cb(null);
-        
+        newMConf.save(function(err){
+
+          console.log("Configuration set, please note username and password below as they will not be shown again.");
+          console.log(newMConf);
+
+          cb(null);
+
+        });
+
       });
 
     } else {
+      sysMail.sendAlert(101, "BLACKHAWK!");
       cb(null);
     }
 

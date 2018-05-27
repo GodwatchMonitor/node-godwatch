@@ -19,6 +19,10 @@ const MainConfSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
+    },
+    currentconfig: {
+      type: Number,
+      required: true,
     }
   },
   { minimize: false }
@@ -27,5 +31,5 @@ const MainConfSchema = new mongoose.Schema(
 MainConfSchema.plugin(timestamps);
 MainConfSchema.plugin(mongooseStringQuery);
 
-const MainConf = mongoose.model('UserPassword', MainConfSchema);
+const MainConf = mongoose.model('MainConfig', MainConfSchema);
 module.exports = MainConf;
