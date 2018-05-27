@@ -7,9 +7,12 @@ const mongoose = require('mongoose');
 const autoIncrement = require('mongoose-auto-increment');
 autoIncrement.initialize(mongoose.connection);
 const fs = require('fs');
-const figlet = require('figlet')
+const figlet = require('figlet');
 const route66 = require('./nodule/route-66');
 const innerAuth = require('./nodule/inner-auth');
+
+const colors = require('colors');
+const timestamp = require('console-timestamp');
 
 // Init Server
 const server = restify.createServer({
@@ -41,21 +44,26 @@ secureserver.use(restifyPlugins.queryParser({ mapParams: true }));
 secureserver.use(restifyPlugins.fullResponse());
 secureserver.use(restifyPlugins.authorizationParser());
 
-figlet.text('\nnode-godwatch\n', {
+figlet.text('node-godwatch', {
     font: 'Doom',
     horizontalLayout: 'default',
     verticalLayout: 'default'
 }, function(err, data) {
     if (err) {
-        console.log('Something went wrong...');
+        console.log('Something went wrong...'.red);
         console.dir(err);
         return;
     }
-    console.log(data);
+    console.log(data.green);
+    console.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray);
+
 });
 
 // Start Server, Connect to DB and Require Routes
 server.listen(config.port, () => {
+
+  console.log('\033c');
+
   //connect to mongodb
   mongoose.Promise = global.Promise;
   mongoose.connect(config.db.uri);
@@ -72,13 +80,15 @@ server.listen(config.port, () => {
 
     route66.initializeRoutes(server);
 
+    console.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray);
+    
     innerAuth.checkSetup(function(err){
 
       if(!err){
 
-        console.log('Server is listening on port ' + config.port);
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Server is listening on port ' + config.port);
 
-        secureserver.listen(String(Number(config.port) + 1), () => {
+        secureserver.listen(config.secureport, () => {
           //connect to mongodb
           mongoose.Promise = global.Promise;
           mongoose.connect(config.db.uri);
@@ -93,7 +103,7 @@ server.listen(config.port, () => {
 
           db.once('open', () => {
             route66.initializeRoutes(secureserver);
-            console.log('Secure Server is listening on port ' + String(Number(config.port) + 1));
+            console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Secure Server is listening on port ' + config.secureport);
           });
 
         });

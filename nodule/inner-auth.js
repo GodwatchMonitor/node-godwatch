@@ -114,17 +114,44 @@ const checkSetup = function(cb){
       );
     }
 
+    console.log('node-godwatch by Samusoidal');
+    console.log('https://www.github.com/samusoidal/node-godwatch/');
+    console.log(`Provided to you with an MIT License
+
+Copyright (c) 2018 Samusoidal
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+`);
+
+    console.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray);
+
     if(doc == null){ //does not exist
 
-      console.log('No configuration found, running config...\n');
-      var userName = prompt.question('----------------------     Username: ');
-      var passWord = prompt.question('----------------------     Password: ', { hideEchoBack: true });
-      var passWord2 = prompt.question('----------------------     Confirm Password: ', { hideEchoBack: true });
+      console.log('No configuration found, running config...\n'.yellow);
+      var userName = prompt.question('----------    '.gray + 'Username: ');
+      var passWord = prompt.question('----------    '.gray + 'Password: ', { hideEchoBack: true });
+      var passWord2 = prompt.question('----------    '.gray + 'Confirm Password: ', { hideEchoBack: true });
 
       while(passWord != passWord2){
-        console.log("----------------------     Passwords do not match, try again");
-        var passWord = prompt.question('----------------------     Password: ', { hideEchoBack: true });
-        var passWord2 = prompt.question('----------------------     Confirm Password: ', { hideEchoBack: true });
+        console.log('----------    '.gray + 'Passwords do not match, try again'.red);
+        var passWord = prompt.question('----------    '.gray + 'Password: ', { hideEchoBack: true });
+        var passWord2 = prompt.question('----------    '.gray + 'Confirm Password: ', { hideEchoBack: true });
       }
 
       let newMConf = new MainConf(
@@ -136,23 +163,20 @@ const checkSetup = function(cb){
         }
       );
 
-      console.log('Running default email config...\n');
+      console.log('\nRunning default email config...\n'.yellow);
 
       var inMailhost = "";
       var inMailport = "";
-      inMailhost = prompt.question('----------------------     Email Server: ');
-      inMailport = prompt.question('----------------------     Email Port: ');
+      inMailhost = prompt.question('----------    '.gray + 'Email Server: ');
+      inMailport = prompt.question('----------    '.gray + 'Email Port: ');
 
       var boolval = true;
 
       var inSecuremail = "";
       while(typeof inSecuremail != typeof boolval){
-        inSecuremail = prompt.question('----------------------     SSL/TLS (y/n): ');
-        console.log(inSecuremail);
-        console.log(typeof inSecuremail);
+        inSecuremail = prompt.question('----------    '.gray + 'SSL/TLS (y/n): ');
         if(inSecuremail == "y"){
           inSecuremail = true;
-          console.log(typeof inSecuremail);
         } else if(inSecuremail == "n") {
           inSecuremail = false;
         }
@@ -160,12 +184,15 @@ const checkSetup = function(cb){
 
       var inMailuser = "";
       var inMailpass = "";
-      inMailuser = prompt.question('----------------------     Email Address: ');
-      inMailpass = prompt.question('----------------------     Email Password: ', { hideEchoBack: true });
+      inMailuser = prompt.question('----------    '.gray + 'Email Address: ');
+      inMailpass = prompt.question('----------    '.gray + 'Email Password: ', { hideEchoBack: true });
 
       var inMailRejectUnauthorized = "";
+
+      console.log('----------    Disable the following to ignore certificate errors when sending notifications'.gray);
+
       while(typeof inMailRejectUnauthorized != typeof boolval){
-        inMailRejectUnauthorized = prompt.question('----------------------     MailRejectUnauthorized (y/n): ');
+        inMailRejectUnauthorized = prompt.question('----------    '.gray + 'MailRejectUnauthorized (y/n): ');
         if(inMailRejectUnauthorized == "y"){
           inMailRejectUnauthorized = true;
         } else if(inMailRejectUnauthorized == "n") {
@@ -189,7 +216,7 @@ const checkSetup = function(cb){
 
         if(err){
           console.error(err);
-          return next(new errors.InternalError(err.message));
+          return next(new errors.InternalError(err.message.red));
           next();
         }
 
@@ -197,8 +224,10 @@ const checkSetup = function(cb){
 
         newMConf.save(function(err){
 
-          console.log("Configuration set, please note username and password below as they will not be shown again.");
-          console.log(newMConf);
+          console.log("\nConfiguration set, please note username and password below as they will not be shown again.\n".yellow);
+          console.log(("  Username: " + newMConf.username).green);
+          console.log(("  Password: " + newMConf.password).green);
+          console.log("\n");
 
           cb(null);
 
