@@ -20,6 +20,10 @@ const RecipientSchema = new mongoose.Schema(
     rid: {
       type: Number,
       required: true,
+    },
+    enabled: {
+      type: Boolean,
+      required: true,
     }
   },
   { minimize: false }

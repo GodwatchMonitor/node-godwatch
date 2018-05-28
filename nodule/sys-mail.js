@@ -9,59 +9,63 @@ function sendAlert(id, mess){
 
   Recipient.findOne({ rid: id }, function(err, doc){
     if(err){
-      console.error(err);
+      console.error(err.red);
       return next(
         new errors.InvalidContentError(err.errors.name.message)
       );
     }
 
-    MainConf.findOne({ blip: 1 }, function(err, mc) {
-      if(err){
-        console.error(err);
-        return next(
-          new errors.InvalidContentError(err.errors.name.message)
-        );
-      }
+    if(doc != null){ // If it DOES exist
 
-      Config.findOne({ cid: mc.currentconfig }, function(err, configuration) {
+      MainConf.findOne({ blip: 1 }, function(err, mc) {
         if(err){
-          console.error(err);
+          console.error(err.red);
           return next(
             new errors.InvalidContentError(err.errors.name.message)
           );
         }
 
-        var mailOptions = {
-          from: configuration.mailuser,
-          to: doc.address,
-          subject: 'TEST',
-          text: mess,
-        };
-
-        var transporter = nodemailer.createTransport({
-          host: configuration.mailhost,
-          port: configuration.mailport,
-          secureConnection: configuration.securemail,
-          auth: {
-            user: configuration.mailuser,
-            pass: configuration.mailpass
-          },
-          tls: {
-            rejectUnauthorized: configuration.mailRejectUnauthorized
-          }
-        });
-
-        transporter.sendMail(mailOptions, function(err, info){
+        Config.findOne({ cid: mc.currentconfig }, function(err, configuration) {
           if(err){
-            return console.log(err);
+            console.error(err.red);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
           }
-          console.log('Alert Sent to ' + doc.address + ': ' + info.response + ' | Message: ' + mess);
+
+          var mailOptions = {
+            from: configuration.mailuser,
+            to: doc.address,
+            subject: 'TEST',
+            text: mess,
+          };
+
+          var transporter = nodemailer.createTransport({
+            host: configuration.mailhost,
+            port: configuration.mailport,
+            secureConnection: configuration.securemail,
+            auth: {
+              user: configuration.mailuser,
+              pass: configuration.mailpass
+            },
+            tls: {
+              rejectUnauthorized: configuration.mailRejectUnauthorized
+            }
+          });
+
+          transporter.sendMail(mailOptions, function(err, info){
+            if(err){
+              return console.log("ERROR".red, err);
+            }
+            console.log('Alert Sent to ' + doc.address + ': ' + info.response + ' | Message: ' + mess);
+          });
+
         });
 
       });
 
-    });
-
+      }
+      
   });
 
 }
