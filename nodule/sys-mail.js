@@ -34,19 +34,19 @@ function sendAlert(id, mess){
           }
 
           var mailOptions = {
-            from: 'phone@samusoidal.com',//configuration.mailuser,
+            from: configuration.mailuser,
             to: doc.address,
             subject: 'TEST',
             text: mess,
           };
 
           var transporter = nodemailer.createTransport({
-            host: 'mail.samusoidal.com',//configuration.mailhost,
-            port: 465,//configuration.mailport,
-            secure: true,//configuration.securemail,
+            host: configuration.mailhost,
+            port: configuration.mailport,
+            secure: configuration.securemail,
             auth: {
-              user: 'phone@samusoidal.com',//configuration.mailuser,
-              pass: '3Stilly6!',//configuration.mailpass
+              user: configuration.mailuser,
+              pass: configuration.mailpass
             },
             tls: {
               rejectUnauthorized: false//configuration.mailRejectUnauthorized

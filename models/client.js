@@ -9,24 +9,28 @@ CLIENT SCHEMA
 
 const ClientSchema = new mongoose.Schema(
   {
-    username: {
+    name: {
       type: String,
       required: true,
     },
-    userid: {
+    cid: {
       type: Number,
       required: true,
     },
-    usernameplain: {
+    hash: {
       type: String,
       required: true,
     },
-    dateJoined: {
+    datereported: {
       type: String,
       required: false,
     },
-    verified: {
-      type: Boolean,
+    interval: {
+      type: String,
+      required: true,
+    },
+    ipaddr: {
+      type: String,
       required: true,
     }
   },
@@ -37,7 +41,7 @@ ClientSchema.plugin(timestamps);
 ClientSchema.plugin(mongooseStringQuery);
 ClientSchema.plugin(autoIncrement.plugin, {
   model: 'Client',
-  field: 'userid',
+  field: 'cid',
   startAt: 100,
   incrementBy: 1
 });

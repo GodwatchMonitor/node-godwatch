@@ -11,6 +11,7 @@ const timestamp = require('console-timestamp');
 const Config = require('../models/configuration');
 const MainConf = require('../models/mainconf');
 const Recipient = require('../models/recipient');
+const Client = require('../models/client');
 
 //Nodules
 const innerAuth = require('../nodule/inner-auth');
@@ -271,6 +272,191 @@ module.exports = function(server) {
     });
 
   });
+
+
+  /*
+    CLIENT ROUTES
+  */
+
+  // CREATE CLIENT
+  server.post('/clients', innerAuth.adminAuth, (req, res, next) => {
+
+    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    if(!req.is('application/json')){
+      return next(
+        new errors.InvalidContentError("Expects 'application/json'")
+      );
+    }
+
+    let data = req.body || {};
+
+    let cli = new Client(data);
+    cli.datereported = "None";
+    
+    cli.save(function(err){
+      if(err){
+        console.error("ERROR".red, err);
+        return next(new errors.InternalError(err.message));
+        next();
+      }
+
+      MainConf.findOne({ blip: 1 }, function(err, mc){
+        if(err){
+          console.error("ERROR".red, err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        }
+
+        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cli.cid } }, function(err, doc){
+
+          if(err){
+            console.error("ERROR".red, err);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          }
+
+          res.send(201, cli);
+          next();
+
+        });
+
+      });
+
+    });
+
+  });
+
+  // GET SINGLE CLIENT
+  server.get('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
+
+    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    Client.findOne({ cid: req.params.cid }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      res.send(200, doc);
+      next();
+
+    });
+
+  });
+
+  // LIST CLIENTS
+  server.get('/clients', innerAuth.adminAuth, (req, res, next) => {
+
+    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + ('all clients').yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    Client.apiQuery(req.params, function(err, docs){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      res.send(200, docs);
+      next();
+
+    });
+
+  });
+
+  // UPDATE CLIENT
+  server.put('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
+
+    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    if(!req.is('application/json')){
+      console.error('[MM-DD-YY] hh:mm    '.timestamp + "Submitted data is not JSON.".red);
+      return next(
+        new errors.InvalidContentError("Expects 'application/json'")
+      );
+    }
+
+    let data = req.body || {};
+
+    Client.findOneAndUpdate({ cid: req.params.cid }, { $set: data }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      } else if (!doc){
+        return next(
+          new errors.ResourceNotFoundError(
+            'The resource you requested could not be found.'
+          )
+        );
+      }
+
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+      res.send(200, doc);
+      next();
+
+    });
+
+  });
+
+  // DELETE CLIENT
+  server.del('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
+
+    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    Client.remove({ cid: req.params.cid }, function(err, docs){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      MainConf.findOne({ blip: 1 }, function(err, mc){
+        if(err){
+          console.error("ERROR".red, err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        }
+
+        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: req.params.cid } }, function(err, doc){
+
+          if(err){
+            console.error("ERROR".red, err);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          }
+
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+          res.send(204);
+          next();
+
+        });
+
+      });
+
+    });
+
+  });
+
+
+  /*
+    RESET EVERYTHING
+  */
 
   // DELETE MAIN CONFIG
   server.del('/admin/config/main', (req, res, next) => {
