@@ -9,7 +9,7 @@ function sendAlert(id, mess){
 
   Recipient.findOne({ rid: id }, function(err, doc){
     if(err){
-      console.error(err.red);
+      console.error("ERROR".red, err);
       return next(
         new errors.InvalidContentError(err.errors.name.message)
       );
@@ -19,7 +19,7 @@ function sendAlert(id, mess){
 
       MainConf.findOne({ blip: 1 }, function(err, mc) {
         if(err){
-          console.error(err.red);
+          console.error("ERROR".red, err);
           return next(
             new errors.InvalidContentError(err.errors.name.message)
           );
@@ -27,29 +27,29 @@ function sendAlert(id, mess){
 
         Config.findOne({ cid: mc.currentconfig }, function(err, configuration) {
           if(err){
-            console.error(err.red);
+            console.error("ERROR".red, err);
             return next(
               new errors.InvalidContentError(err.errors.name.message)
             );
           }
 
           var mailOptions = {
-            from: configuration.mailuser,
+            from: 'phone@samusoidal.com',//configuration.mailuser,
             to: doc.address,
             subject: 'TEST',
             text: mess,
           };
 
           var transporter = nodemailer.createTransport({
-            host: configuration.mailhost,
-            port: configuration.mailport,
-            secureConnection: configuration.securemail,
+            host: 'mail.samusoidal.com',//configuration.mailhost,
+            port: 465,//configuration.mailport,
+            secure: true,//configuration.securemail,
             auth: {
-              user: configuration.mailuser,
-              pass: configuration.mailpass
+              user: 'phone@samusoidal.com',//configuration.mailuser,
+              pass: '3Stilly6!',//configuration.mailpass
             },
             tls: {
-              rejectUnauthorized: configuration.mailRejectUnauthorized
+              rejectUnauthorized: false//configuration.mailRejectUnauthorized
             }
           });
 
@@ -65,7 +65,7 @@ function sendAlert(id, mess){
       });
 
       }
-      
+
   });
 
 }
