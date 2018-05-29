@@ -1,6 +1,26 @@
-# GodWatch for node.js
+# Godwatch for node.js
 
-GodWatch is a remote system uptime monitor running with node.js.
+Godwatch is a remote system uptime monitor running with node.js.
+
+Godwatch is modular, meaning each server instance can be enabled to act as a client and report to another dashboard:
+```
+        Main Server
+            |
+           / \
+          /   \
+     Client1  Client2
+       |         |
+       |      Machines
+      / \    [a, b, c ]
+     /   \
+  Site1  Site2
+    |       \
+ Machines    \
+[a, b, c ]  Machines 
+           [a, b, c ]
+
+
+```
 
 Oh, and by the way IT'S NOT DONE! YAY!!!
 Don't use it yet!
