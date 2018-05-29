@@ -31,7 +31,7 @@ const ClientSchema = new mongoose.Schema(
     },
     ipaddr: {
       type: String,
-      required: true,
+      required: false,
     }
   },
   { minimize: false }
