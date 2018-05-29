@@ -293,7 +293,15 @@ module.exports = function(server) {
 
     let cli = new Client(data);
     cli.datereported = "None";
-    
+
+    cli.hash = (function() {
+      let ns = "";
+      for(var i=0; i < cli.name.length; i++){
+        ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
+      }
+      return ns;
+    })();
+
     cli.save(function(err){
       if(err){
         console.error("ERROR".red, err);
@@ -453,6 +461,62 @@ module.exports = function(server) {
 
   });
 
+
+  // CLIENT REPORT
+  server.put('/clients/report/:chash', innerAuth.adminAuth, (req, res, next) => {
+
+    let date = '[MM-DD-YY] hh:mm'.timestamp;
+
+    Client.findOneAndUpdate({ hash: req.params.chash }, { datereported: date, ipaddr: req.body.ip, interval: req.body.interval }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      } else if (!doc){
+        return next(
+          new errors.ResourceNotFoundError(
+            'The resource you requested could not be found.'
+          )
+        );
+      }
+
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + ('client ' + doc.name).yellow + ' reporting from ' + req.connection.remoteAddress.cyan);
+
+      res.send(200, doc);
+      next();
+
+    });
+
+  });
+
+  // CLIENT RETRIEVE
+  server.get('/clients/report/:chash', innerAuth.adminAuth, (req, res, next) => {
+
+    Client.findOne({ hash: req.params.chash }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      } else if (!doc){
+        return next(
+          new errors.ResourceNotFoundError(
+            'The resource you requested could not be found.'
+          )
+        );
+      }
+
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + ('client ' + doc.name).yellow + ' requesting settings from ' + req.connection.remoteAddress.cyan);
+
+      res.send(200, doc);
+      next();
+
+    });
+
+  });
 
   /*
     RESET EVERYTHING
