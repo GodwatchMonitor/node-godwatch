@@ -11,7 +11,7 @@ Don't use it yet!
 
 ### Server
 
-To set up, you will need node and mongodb installed. You should also install nodemon to automatically restart the server on uncaught exceptions.
+To set up, you will need node and mongodb installed. You should also install nodemon to automatically restart the application on uncaught exceptions.
 
 ```
 git clone https://github.com/Samusoidal/node-godwatch/ godwatch
