@@ -10,6 +10,7 @@ const fs = require('fs');
 const figlet = require('figlet');
 const route66 = require('./nodule/route-66');
 const innerAuth = require('./nodule/inner-auth');
+const Reporting = require('./nodule/reporting');
 
 const colors = require('colors');
 const timestamp = require('console-timestamp');
@@ -93,6 +94,8 @@ server.listen(config.port, () => {
           autoIncrement.initialize(mongoose.connection);
 
           const db = mongoose.connection;
+
+          Reporting.initialize();
 
           db.on('error', (err) => {
             console.error(err);

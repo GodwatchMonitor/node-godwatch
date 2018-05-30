@@ -465,7 +465,7 @@ module.exports = function(server) {
   // CLIENT REPORT
   server.put('/clients/report/:chash', innerAuth.adminAuth, (req, res, next) => {
 
-    let date = '[MM-DD-YY] hh:mm'.timestamp;
+    let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
 
     Client.findOneAndUpdate({ hash: req.params.chash }, { datereported: date, ipaddr: req.body.ip, interval: req.body.interval }, function(err, doc){
 

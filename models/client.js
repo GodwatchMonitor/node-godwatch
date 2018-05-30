@@ -26,7 +26,7 @@ const ClientSchema = new mongoose.Schema(
       required: false,
     },
     interval: {
-      type: String,
+      type: Number,
       required: true,
     },
     ipaddr: {
