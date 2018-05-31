@@ -26,6 +26,8 @@ function check_client(cid, timer){
         )
     }
 
+    ndata = {};
+
     ninterval = client.interval;
 
     console.log('[MM-DD-YY] hh:mm    '.timestamp + "CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
@@ -35,12 +37,53 @@ function check_client(cid, timer){
 
     let dif = date_difference(date, datereported)*60*1000;
 
-    console.log(dif, client.interval*2);
+    if(dif > client.interval*client.tolerance){
 
-    if(dif > client.interval*2){
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + "ALERT: ".red + "client ".yellow + client.name.cyan + " has not reported in the specified interval (" + String(client.interval).cyan + ")");
-      SysMail.sendAlert(120, client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+      if(client.timesmissing >= 0){
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + "ALERT: ".red + "client ".yellow + client.name.cyan + " has not reported in the specified interval (" + String(client.interval).cyan + ")");
+
+        if(!client.missing){ //Only send alert the first time
+
+          SysMail.sendAlert(121, client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+          ndata.missing = true;
+
+        }
+
+      }
+
+    } else {
+
+      if(client.missing){ //Send reconnection alert
+
+        SysMail.sendAlert(121, client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+        ndata.missing = false;
+
+      }
+
     }
+
+    if(dif > client.interval*client.tolerance || client.timesmissing == -1){
+      ndata.timesmissing = client.timesmissing+1;
+    }
+
+    Client.findOneAndUpdate({ cid: cid }, { $set: ndata }, function(err, clinew){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      } else if (!client){
+        console.error("ERROR".red, err);
+        return new errors.ResourceNotFoundError(
+            'The resource you requested could not be found.'
+          )
+      }
+
+    });
+
+    console.log(ndata);
 
     clearInterval(timer);
     timer = setInterval(function() { check_client(client.cid, timer); }, client.interval);
@@ -63,6 +106,23 @@ function initialize(){
     docs.forEach(function(client){
       console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
       let timer = setInterval(function() { check_client(client.cid, timer); }, client.interval);
+
+      Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
+
+        if(err){
+          console.error("ERROR".red, err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        } else if (!client){
+          console.error("ERROR".red, err);
+          return new errors.ResourceNotFoundError(
+              'The resource you requested could not be found.'
+            )
+        }
+
+      });
+
     });
 
   });

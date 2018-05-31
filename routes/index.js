@@ -54,6 +54,43 @@ module.exports = function(server) {
     });
   });
 
+  server.put('/config/:cid', innerAuth.adminAuth, (req, res, next) => {
+
+    //console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    if(!req.is('application/json')){
+      console.error('[MM-DD-YY] hh:mm    '.timestamp + "Submitted data is not JSON.".red);
+      return next(
+        new errors.InvalidContentError("Expects 'application/json'")
+      );
+    }
+
+    let data = req.body || {};
+
+    Config.findOneAndUpdate({ cid: req.params.cid }, { $set: data }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      } else if (!doc){
+        return next(
+          new errors.ResourceNotFoundError(
+            'The resource you requested could not be found.'
+          )
+        );
+      }
+
+      //console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+      res.send(200, doc);
+      next();
+
+    });
+
+  });
+
   // DELETE CONFIG
   server.del('/config/:cid', innerAuth.adminAuth, (req, res, next) => {
     Config.remove({ cid: req.params.cid }, function(err) {

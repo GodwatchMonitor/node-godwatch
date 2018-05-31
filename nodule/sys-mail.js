@@ -49,7 +49,7 @@ function sendAlert(id, mess){
               pass: configuration.mailpass
             },
             tls: {
-              rejectUnauthorized: false//configuration.mailRejectUnauthorized
+              rejectUnauthorized: configuration.mailRejectUnauthorized
             }
           });
 

@@ -32,6 +32,18 @@ const ClientSchema = new mongoose.Schema(
     ipaddr: {
       type: String,
       required: false,
+    },
+    tolerance: {
+      type: Number,
+      required: true,
+    },
+    timesmissing: {
+      type: Number,
+      required: false,
+    },
+    missing: {
+      type: Boolean,
+      required: true,
     }
   },
   { minimize: false }

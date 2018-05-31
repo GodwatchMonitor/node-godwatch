@@ -11,6 +11,7 @@ const figlet = require('figlet');
 const route66 = require('./nodule/route-66');
 const innerAuth = require('./nodule/inner-auth');
 const Reporting = require('./nodule/reporting');
+const SysMail = require('./nodule/sys-mail');
 
 const colors = require('colors');
 const timestamp = require('console-timestamp');
@@ -96,6 +97,7 @@ server.listen(config.port, () => {
           const db = mongoose.connection;
 
           Reporting.initialize();
+          SysMail.sendAlert(120, "BLACKHAWK!");
 
           db.on('error', (err) => {
             console.error(err);
