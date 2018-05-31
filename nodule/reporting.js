@@ -83,8 +83,6 @@ function check_client(cid, timer){
 
     });
 
-    console.log(ndata);
-
     clearInterval(timer);
     timer = setInterval(function() { check_client(client.cid, timer); }, client.interval);
 

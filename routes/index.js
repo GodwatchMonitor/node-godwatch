@@ -504,7 +504,7 @@ module.exports = function(server) {
 
     let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
 
-    Client.findOneAndUpdate({ hash: req.params.chash }, { datereported: date, ipaddr: req.body.ip, interval: req.body.interval }, function(err, doc){
+    Client.findOneAndUpdate({ hash: req.params.chash }, { datereported: date, ipaddr: req.body.ip }, function(err, doc){
 
       if(err){
         console.error("ERROR".red, err);
