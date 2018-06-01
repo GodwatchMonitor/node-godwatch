@@ -236,7 +236,6 @@ SOFTWARE.
       });
 
     } else {
-      sysMail.sendAlert(115, "BLACKHAWK!");
       cb(null);
     }
 

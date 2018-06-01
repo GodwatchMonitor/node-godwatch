@@ -97,7 +97,6 @@ server.listen(config.port, () => {
           const db = mongoose.connection;
 
           Reporting.initialize();
-          SysMail.sendAlert(120, "BLACKHAWK!");
 
           db.on('error', (err) => {
             console.error(err);

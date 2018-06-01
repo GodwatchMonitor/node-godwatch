@@ -45,7 +45,7 @@ function check_client(cid, timer){
 
         if(!client.missing){ //Only send alert the first time
 
-          SysMail.sendAlert(121, client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+          SysMail.sendAlerts("Godwatch Alert", client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
           ndata.missing = true;
 
         }
@@ -56,7 +56,7 @@ function check_client(cid, timer){
 
       if(client.missing){ //Send reconnection alert
 
-        SysMail.sendAlert(121, client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+        SysMail.sendAlerts("Godwatch Alert", client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
         ndata.missing = false;
 
       }
