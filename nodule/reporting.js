@@ -119,9 +119,9 @@ function initialize(){
 
     docs.forEach(function(client){
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
-
       if(client.enabled){
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
 
         timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
 

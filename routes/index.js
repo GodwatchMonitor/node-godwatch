@@ -382,8 +382,8 @@ module.exports = function(server) {
 
   });
 
-  // CREATE INSTALLER
-  server.post('/clients/new', innerAuth.adminAuth, (req, res, next) => {
+  // CREATE CLIENT FROM INSTALLER
+  server.post('/clients/inst/new', innerAuth.adminAuth, (req, res, next) => {
 
     console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
@@ -393,10 +393,62 @@ module.exports = function(server) {
       );
     }*/
 
-    let data = req.body || {};
-    console.log(data);
-    res.send(200);
-    next();
+    let data = JSON.parse(req.body) || {};
+
+    console.log(data.name)
+
+    let cli = new Client(data);
+    cli.datereported = "None";
+    cli.timesmissing = 0;
+    cli.ipaddr = "None";
+
+    cli.enabled = false;
+    cli.missing = false;
+    cli.enabled = false;
+
+    cli.hash = (function() {
+      let ns = "";
+      for(var i=0; i < cli.name.length; i++){
+        ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
+      }
+      return ns;
+    })();
+
+    cli.save(function(err){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(new errors.InternalError(err.message));
+        next();
+      }
+
+      MainConf.findOne({ blip: 1 }, function(err, mc){
+        if(err){
+          console.error("ERROR".red, err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        }
+
+        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cli.cid } }, function(err, doc){
+
+          if(err){
+            console.error("ERROR".red, err);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          }
+
+          Reporting.resetAllTimers();
+
+          res.send(200);
+          next();
+
+        });
+
+      });
+
+    });
 
   });
 
@@ -480,6 +532,52 @@ module.exports = function(server) {
 
   });
 
+  // DELETE CLIENT FROM INSTALLER
+  server.post('/clients/inst/:name', innerAuth.adminAuth, (req, res, next) => {
+
+    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.name).yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    Client.remove({ name: req.params.name }, function(err, docs){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      MainConf.findOne({ blip: 1 }, function(err, mc){
+        if(err){
+          console.error("ERROR".red, err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        }
+
+        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: docs.cid } }, function(err, doc){
+
+          if(err){
+            console.error("ERROR".red, err);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          }
+
+          Reporting.resetAllTimers();
+
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+          res.send(204);
+          next();
+
+        });
+
+      });
+
+    });
+
+  });
+
   // DELETE CLIENT
   server.del('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
 
@@ -546,8 +644,10 @@ module.exports = function(server) {
           )
         );
       }
-
+      console.log(doc);
       console.log('[MM-DD-YY] hh:mm    '.timestamp + ('client ' + doc.name).yellow + ' reporting from ' + req.connection.remoteAddress.cyan);
+
+      Reporting.resetAllTimers();
 
       res.send(200, doc);
       next();
