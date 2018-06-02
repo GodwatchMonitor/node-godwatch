@@ -88,7 +88,9 @@ function check_client(cid){
     });
 
     clearInterval(timers[client.cid]);
-    timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
+    if(client.enabled){
+      timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
+    }
 
   });
 
@@ -116,24 +118,30 @@ function initialize(){
     }
 
     docs.forEach(function(client){
+
       console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
-      timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
 
-      Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
+      if(client.enabled){
 
-        if(err){
-          console.error("ERROR".red, err);
-          return next(
-            new errors.InvalidContentError(err.errors.name.message)
-          );
-        } else if (!client){
-          console.error("ERROR".red, err);
-          return new errors.ResourceNotFoundError(
-              'The resource you requested could not be found.'
-            )
-        }
+        timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
 
-      });
+        Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
+
+          if(err){
+            console.error("ERROR".red, err);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          } else if (!client){
+            console.error("ERROR".red, err);
+            return new errors.ResourceNotFoundError(
+                'The resource you requested could not be found.'
+              )
+          }
+
+        });
+
+      }
 
     });
 

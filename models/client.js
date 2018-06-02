@@ -44,6 +44,10 @@ const ClientSchema = new mongoose.Schema(
     missing: {
       type: Boolean,
       required: true,
+    },
+    enabled: {
+      type: Boolean,
+      required: true,
     }
   },
   { minimize: false }

@@ -334,6 +334,8 @@ module.exports = function(server) {
     cli.timesmissing = 0;
     cli.ipaddr = "None";
 
+    cli.enabled = false;
+
     cli.hash = (function() {
       let ns = "";
       for(var i=0; i < cli.name.length; i++){
@@ -343,7 +345,7 @@ module.exports = function(server) {
     })();
 
     cli.save(function(err){
-      
+
       if(err){
         console.error("ERROR".red, err);
         return next(new errors.InternalError(err.message));
@@ -530,7 +532,7 @@ module.exports = function(server) {
 
     let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
 
-    Client.findOneAndUpdate({ hash: req.params.chash }, { datereported: date, ipaddr: req.body.ip }, function(err, doc){
+    Client.findOneAndUpdate({ hash: req.params.chash }, { datereported: date, ipaddr: req.body.ip, enabled: true }, function(err, doc){
 
       if(err){
         console.error("ERROR".red, err);
