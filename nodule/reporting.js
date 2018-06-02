@@ -1,5 +1,8 @@
 const Client = require('../models/client');
+const errors = require('restify-errors');
 const SysMail = require('../nodule/sys-mail');
+
+var timers = [];
 
 function date_difference(date1, date2){
 
@@ -8,9 +11,10 @@ function date_difference(date1, date2){
   date2obj = new Date(date2);
 
   return (date1obj - date2obj)/1000/60;
+
 }
 
-function check_client(cid, timer){
+function check_client(cid){
 
   Client.findOne({ cid: cid }, function(err, client){
 
@@ -83,10 +87,20 @@ function check_client(cid, timer){
 
     });
 
-    clearInterval(timer);
-    timer = setInterval(function() { check_client(client.cid, timer); }, client.interval);
+    clearInterval(timers[client.cid]);
+    timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
 
   });
+
+}
+
+function resetAllTimers(){
+
+  for(var i = 0; i < timers.length; i++){ clearInterval(timers[i]); }
+
+  timers = [];
+
+  initialize();
 
 }
 
@@ -103,7 +117,7 @@ function initialize(){
 
     docs.forEach(function(client){
       console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
-      let timer = setInterval(function() { check_client(client.cid, timer); }, client.interval);
+      timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
 
       Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
 
@@ -129,4 +143,4 @@ function initialize(){
 
 }
 
-module.exports = {initialize}
+module.exports = {initialize, resetAllTimers}

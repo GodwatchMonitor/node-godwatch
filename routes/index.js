@@ -16,6 +16,7 @@ const Client = require('../models/client');
 //Nodules
 const innerAuth = require('../nodule/inner-auth');
 const sysMail = require('../nodule/sys-mail');
+const Reporting = require('../nodule/reporting');
 
 module.exports = function(server) {
 
@@ -330,6 +331,8 @@ module.exports = function(server) {
 
     let cli = new Client(data);
     cli.datereported = "None";
+    cli.timesmissing = 0;
+    cli.ipaddr = "None";
 
     cli.hash = (function() {
       let ns = "";
@@ -340,6 +343,7 @@ module.exports = function(server) {
     })();
 
     cli.save(function(err){
+      
       if(err){
         console.error("ERROR".red, err);
         return next(new errors.InternalError(err.message));
@@ -363,6 +367,8 @@ module.exports = function(server) {
             );
           }
 
+          Reporting.resetAllTimers();
+
           res.send(201, cli);
           next();
 
@@ -371,6 +377,24 @@ module.exports = function(server) {
       });
 
     });
+
+  });
+
+  // CREATE INSTALLER
+  server.post('/clients/new', innerAuth.adminAuth, (req, res, next) => {
+
+    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
+
+    /*if(!req.is('application/json')){
+      return next(
+        new errors.InvalidContentError("Expects 'application/json'")
+      );
+    }*/
+
+    let data = req.body || {};
+    console.log(data);
+    res.send(200);
+    next();
 
   });
 
@@ -484,6 +508,8 @@ module.exports = function(server) {
               new errors.InvalidContentError(err.errors.name.message)
             );
           }
+
+          Reporting.resetAllTimers();
 
           console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
