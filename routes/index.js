@@ -27,7 +27,9 @@ module.exports = function(server) {
 
   // LIST CONFIG
   server.get('/config', innerAuth.adminAuth, (req, res, next) => {
+
     Config.apiQuery(req.params, function(err, docs){
+
       if(err){
         console.error(err);
         return next(
@@ -35,14 +37,20 @@ module.exports = function(server) {
         );
       }
 
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'LIST '.green + 'all configuration'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful'.green);
+
       res.send(docs);
       next();
+
     });
+
   });
 
   // GET SINGLE CONFIG
   server.get('/config/:cid', innerAuth.adminAuth, (req, res, next) => {
+
     Config.findOne({ cid: req.params.cid }, function(err, doc) {
+
       if(err){
         console.error(err);
         return next(
@@ -50,14 +58,17 @@ module.exports = function(server) {
         );
       }
 
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'configuration '.yellow + doc.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
       res.send(doc);
       next();
+
     });
+
   });
 
+  // UPDATE CONFIG
   server.put('/config/:cid', innerAuth.adminAuth, (req, res, next) => {
-
-    //console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
     if(!req.is('application/json')){
       console.error('[MM-DD-YY] hh:mm    '.timestamp + "Submitted data is not JSON.".red);
@@ -83,7 +94,7 @@ module.exports = function(server) {
         );
       }
 
-      //console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'configuration '.yellow + doc.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
       res.send(200, doc);
       next();
@@ -94,7 +105,9 @@ module.exports = function(server) {
 
   // DELETE CONFIG
   server.del('/config/:cid', innerAuth.adminAuth, (req, res, next) => {
+
     Config.remove({ cid: req.params.cid }, function(err) {
+
       if(err){
         console.error(err);
         return next(
@@ -102,9 +115,13 @@ module.exports = function(server) {
         );
       }
 
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'configuration '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + 'successful.'.green);
+
       res.send(204);
       next();
+
     });
+
   });
 
 
@@ -112,7 +129,7 @@ module.exports = function(server) {
     ADMINISTRATIVE ROUTES
   */
 
-  // RESET PASSWORD
+  /*// RESET PASSWORD
   server.put('/admin/passkey/reset', innerAuth.adminAuth, (req, res, next) => {
 
     let data = {
@@ -131,7 +148,7 @@ module.exports = function(server) {
       res.send(205);
       next();
     });
-  });
+  });*/
 
 
   /*
@@ -140,8 +157,6 @@ module.exports = function(server) {
 
   // CREATE RECIPIENT
   server.post('/recipients', innerAuth.adminAuth, (req, res, next) => {
-
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'recipient'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
     if(!req.is('application/json')){
       return next(
@@ -152,7 +167,9 @@ module.exports = function(server) {
     let data = req.body || {};
 
     let recip = new Recipient(data);
+
     recip.save(function(err){
+
       if(err){
         console.error("ERROR".red, err);
         return next(new errors.InternalError(err.message));
@@ -160,6 +177,7 @@ module.exports = function(server) {
       }
 
       MainConf.findOne({ blip: 1 }, function(err, mc){
+
         if(err){
           console.error("ERROR".red, err);
           return next(
@@ -176,6 +194,8 @@ module.exports = function(server) {
             );
           }
 
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'recipient'.yellow + ' request from ' + req.connection.remoteAddress.cyan + 'successful.'.green);
+
           res.send(201, recip);
           next();
 
@@ -190,8 +210,6 @@ module.exports = function(server) {
   // GET SINGLE RECPIENT
   server.get('/recipients/:rid', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
     Recipient.findOne({ rid: req.params.rid }, function(err, doc){
 
       if(err){
@@ -200,6 +218,8 @@ module.exports = function(server) {
           new errors.InvalidContentError(err.errors.name.message)
         );
       }
+
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful'.green);
 
       res.send(200, doc);
       next();
@@ -211,8 +231,6 @@ module.exports = function(server) {
   // LIST RECIPIENTS
   server.get('/recipients', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + ('all recipients').yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
     Recipient.apiQuery(req.params, function(err, docs){
 
       if(err){
@@ -221,6 +239,8 @@ module.exports = function(server) {
           new errors.InvalidContentError(err.errors.name.message)
         );
       }
+
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'all recipients'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
       res.send(200, docs);
       next();
@@ -231,8 +251,6 @@ module.exports = function(server) {
 
   // UPDATE RECIPIENT
   server.put('/recipients/:rid', innerAuth.adminAuth, (req, res, next) => {
-
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
     if(!req.is('application/json')){
       console.error('[MM-DD-YY] hh:mm    '.timestamp + "Submitted data is not JSON.".red);
@@ -258,7 +276,7 @@ module.exports = function(server) {
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
       res.send(200, doc);
       next();
@@ -270,8 +288,6 @@ module.exports = function(server) {
   // DELETE RECIPIENT
   server.del('/recipients/:rid', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
     Recipient.remove({ rid: req.params.rid }, function(err, docs){
 
       if(err){
@@ -282,6 +298,7 @@ module.exports = function(server) {
       }
 
       MainConf.findOne({ blip: 1 }, function(err, mc){
+
         if(err){
           console.error("ERROR".red, err);
           return next(
@@ -298,7 +315,7 @@ module.exports = function(server) {
             );
           }
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('recipient ' + req.params.rid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
           res.send(204);
           next();
@@ -319,8 +336,6 @@ module.exports = function(server) {
   // CREATE CLIENT
   server.post('/clients', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
     if(!req.is('application/json')){
       return next(
         new errors.InvalidContentError("Expects 'application/json'")
@@ -329,54 +344,79 @@ module.exports = function(server) {
 
     let data = req.body || {};
 
-    let cli = new Client(data);
-    cli.datereported = "None";
-    cli.timesmissing = 0;
-    cli.ipaddr = "None";
-
-    cli.enabled = false;
-
-    cli.hash = (function() {
-      let ns = "";
-      for(var i=0; i < cli.name.length; i++){
-        ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
-      }
-      return ns;
-    })();
-
-    cli.save(function(err){
+    Client.findOne({ name: data.name }, function(err, doc){
 
       if(err){
         console.error("ERROR".red, err);
-        return next(new errors.InternalError(err.message));
-        next();
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
       }
 
-      MainConf.findOne({ blip: 1 }, function(err, mc){
-        if(err){
-          console.error("ERROR".red, err);
-          return next(
-            new errors.InvalidContentError(err.errors.name.message)
-          );
-        }
+      if(doc == null){
 
-        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cli.cid } }, function(err, doc){
+        let cli = new Client(data);
+
+        cli.datereported = "None";
+        cli.timesmissing = 0;
+        cli.ipaddr = "None";
+        cli.enabled = false;
+
+        cli.hash = (function() {
+          let ns = "";
+          for(var i=0; i < cli.name.length; i++){
+            ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
+          }
+          return ns;
+        })();
+
+        cli.save(function(err){
 
           if(err){
             console.error("ERROR".red, err);
-            return next(
-              new errors.InvalidContentError(err.errors.name.message)
-            );
+            return next(new errors.InternalError(err.message));
+            next();
           }
 
-          Reporting.resetAllTimers();
+          MainConf.findOne({ blip: 1 }, function(err, mc){
 
-          res.send(201, cli);
-          next();
+            if(err){
+              console.error("ERROR".red, err);
+              return next(
+                new errors.InvalidContentError(err.errors.name.message)
+              );
+            }
+
+            Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cli.cid } }, function(err, doc){
+
+              if(err){
+                console.error("ERROR".red, err);
+                return next(
+                  new errors.InvalidContentError(err.errors.name.message)
+                );
+              }
+
+              console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+              Reporting.resetAllTimers();
+
+              res.send(201, cli);
+              next();
+
+            });
+
+          });
 
         });
 
-      });
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan + " failed (name exists).".red);
+
+        res.send(400);
+        next();
+
+      }
 
     });
 
@@ -384,8 +424,6 @@ module.exports = function(server) {
 
   // CREATE CLIENT FROM INSTALLER
   server.post('/clients/inst/new', innerAuth.adminAuth, (req, res, next) => {
-
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
     /*if(!req.is('application/json')){
       return next(
@@ -395,58 +433,81 @@ module.exports = function(server) {
 
     let data = JSON.parse(req.body) || {};
 
-    console.log(data.name)
-
-    let cli = new Client(data);
-    cli.datereported = "None";
-    cli.timesmissing = 0;
-    cli.ipaddr = "None";
-
-    cli.enabled = false;
-    cli.missing = false;
-    cli.enabled = false;
-
-    cli.hash = (function() {
-      let ns = "";
-      for(var i=0; i < cli.name.length; i++){
-        ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
-      }
-      return ns;
-    })();
-
-    cli.save(function(err){
+    Client.findOne({ name: data.name }, function(err, doc){
 
       if(err){
         console.error("ERROR".red, err);
-        return next(new errors.InternalError(err.message));
-        next();
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
       }
 
-      MainConf.findOne({ blip: 1 }, function(err, mc){
-        if(err){
-          console.error("ERROR".red, err);
-          return next(
-            new errors.InvalidContentError(err.errors.name.message)
-          );
-        }
+      if(doc == null){
 
-        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cli.cid } }, function(err, doc){
+        let cli = new Client(data);
+
+        cli.datereported = "None";
+        cli.timesmissing = 0;
+        cli.ipaddr = "None";
+        cli.enabled = false;
+        cli.missing = false;
+        cli.enabled = false;
+
+        cli.hash = (function() {
+          let ns = "";
+          for(var i=0; i < cli.name.length; i++){
+            ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
+          }
+          return ns;
+        })();
+
+        cli.save(function(err){
 
           if(err){
             console.error("ERROR".red, err);
-            return next(
-              new errors.InvalidContentError(err.errors.name.message)
-            );
+            return next(new errors.InternalError(err.message));
+            next();
           }
 
-          Reporting.resetAllTimers();
+          MainConf.findOne({ blip: 1 }, function(err, mc){
 
-          res.send(200);
-          next();
+            if(err){
+              console.error("ERROR".red, err);
+              return next(
+                new errors.InvalidContentError(err.errors.name.message)
+              );
+            }
+
+            Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cli.cid } }, function(err, doc){
+
+              if(err){
+                console.error("ERROR".red, err);
+                return next(
+                  new errors.InvalidContentError(err.errors.name.message)
+                );
+              }
+
+              console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan + " successful.".green);
+
+              Reporting.resetAllTimers();
+
+              res.send(200);
+              next();
+
+            });
+
+          });
 
         });
 
-      });
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan + " failed (name exists).".red);
+
+        res.send(400);
+        next();
+
+      }
 
     });
 
@@ -454,8 +515,6 @@ module.exports = function(server) {
 
   // GET SINGLE CLIENT
   server.get('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
-
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
     Client.findOne({ cid: req.params.cid }, function(err, doc){
 
@@ -465,6 +524,8 @@ module.exports = function(server) {
           new errors.InvalidContentError(err.errors.name.message)
         );
       }
+
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
       res.send(200, doc);
       next();
@@ -476,8 +537,6 @@ module.exports = function(server) {
   // LIST CLIENTS
   server.get('/clients', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + ('all clients').yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
     Client.apiQuery(req.params, function(err, docs){
 
       if(err){
@@ -486,6 +545,8 @@ module.exports = function(server) {
           new errors.InvalidContentError(err.errors.name.message)
         );
       }
+
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'all clients'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
       res.send(200, docs);
       next();
@@ -496,8 +557,6 @@ module.exports = function(server) {
 
   // UPDATE CLIENT
   server.put('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
-
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
 
     if(!req.is('application/json')){
       console.error('[MM-DD-YY] hh:mm    '.timestamp + "Submitted data is not JSON.".red);
@@ -523,7 +582,7 @@ module.exports = function(server) {
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
       res.send(200, doc);
       next();
@@ -535,8 +594,6 @@ module.exports = function(server) {
   // DELETE CLIENT FROM INSTALLER
   server.post('/clients/inst/:name', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.name).yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
     Client.remove({ name: req.params.name }, function(err, docs){
 
       if(err){
@@ -547,6 +604,7 @@ module.exports = function(server) {
       }
 
       MainConf.findOne({ blip: 1 }, function(err, mc){
+
         if(err){
           console.error("ERROR".red, err);
           return next(
@@ -565,7 +623,7 @@ module.exports = function(server) {
 
           Reporting.resetAllTimers();
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.name.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
           res.send(204);
           next();
@@ -593,6 +651,7 @@ module.exports = function(server) {
       }
 
       MainConf.findOne({ blip: 1 }, function(err, mc){
+
         if(err){
           console.error("ERROR".red, err);
           return next(
@@ -611,7 +670,7 @@ module.exports = function(server) {
 
           Reporting.resetAllTimers();
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
           res.send(204);
           next();
@@ -644,10 +703,12 @@ module.exports = function(server) {
           )
         );
       }
-      console.log(doc);
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + ('client ' + doc.name).yellow + ' reporting from ' + req.connection.remoteAddress.cyan);
 
-      Reporting.resetAllTimers();
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Client '.yellow + doc.name.cyan + ' reporting from ' + req.connection.remoteAddress.cyan);
+
+      if(!doc.enabled){
+        Reporting.resetAllTimers();
+      }
 
       res.send(200, doc);
       next();
@@ -674,7 +735,7 @@ module.exports = function(server) {
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + ('client ' + doc.name).yellow + ' requesting settings from ' + req.connection.remoteAddress.cyan);
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + doc.name.cyan + ' settings request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
       res.send(200, doc);
       next();
@@ -691,6 +752,7 @@ module.exports = function(server) {
   server.del('/admin/config/main', (req, res, next) => {
 
     Config.remove({}, function(err) {
+
       if(err){
         console.error("ERROR".red, err);
         return next(
@@ -701,6 +763,7 @@ module.exports = function(server) {
       Config.resetCount(function(err, nextCount){
 
         MainConf.remove({}, function(err) {
+
           if(err){
             console.error("ERROR".red, err);
             return next(
@@ -708,8 +771,11 @@ module.exports = function(server) {
             );
           }
 
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'EVERYTHING'.red + ' from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
           res.send(204);
           next();
+
         });
 
       });
