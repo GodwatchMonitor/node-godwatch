@@ -10,7 +10,7 @@ function date_difference(date1, date2){
   date1obj = new Date(date1);
   date2obj = new Date(date2);
 
-  return (date1obj - date2obj)/1000/60;
+  return (date1obj.getTime() - date2obj.getTime())/(1000 * 60);
 
 }
 
@@ -40,6 +40,8 @@ function check_client(cid){
     let datereported = client.datereported;
 
     let dif = date_difference(date, datereported)*60*1000;
+
+    console.log(date, datereported, dif, ' - ', client.interval*client.tolerance);
 
     if(dif > client.interval*client.tolerance){
 

@@ -115,7 +115,7 @@ module.exports = function(server) {
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'configuration '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + 'successful.'.green);
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'configuration '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
       res.send(204);
       next();
@@ -194,7 +194,7 @@ module.exports = function(server) {
             );
           }
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'recipient'.yellow + ' request from ' + req.connection.remoteAddress.cyan + 'successful.'.green);
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'recipient'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
           res.send(201, recip);
           next();
@@ -594,7 +594,7 @@ module.exports = function(server) {
   // DELETE CLIENT FROM INSTALLER
   server.post('/clients/inst/:name', innerAuth.adminAuth, (req, res, next) => {
 
-    Client.remove({ name: req.params.name }, function(err, docs){
+    Client.findOne({ name: req.params.name }, function(err, clienttoremove){
 
       if(err){
         console.error("ERROR".red, err);
@@ -603,7 +603,7 @@ module.exports = function(server) {
         );
       }
 
-      MainConf.findOne({ blip: 1 }, function(err, mc){
+      Client.remove({ cid: clienttoremove.cid }, function(err, docs){
 
         if(err){
           console.error("ERROR".red, err);
@@ -612,7 +612,7 @@ module.exports = function(server) {
           );
         }
 
-        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: docs.cid } }, function(err, doc){
+        MainConf.findOne({ blip: 1 }, function(err, mc){
 
           if(err){
             console.error("ERROR".red, err);
@@ -620,13 +620,24 @@ module.exports = function(server) {
               new errors.InvalidContentError(err.errors.name.message)
             );
           }
+          console.log(docs);
+          Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: clienttoremove.cid } }, function(err, doc){
 
-          Reporting.resetAllTimers();
+            if(err){
+              console.error("ERROR".red, err);
+              return next(
+                new errors.InvalidContentError(err.errors.name.message)
+              );
+            }
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.name.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+            Reporting.resetAllTimers();
 
-          res.send(204);
-          next();
+            console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.name.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+            res.send(204);
+            next();
+
+          });
 
         });
 
