@@ -398,7 +398,7 @@ module.exports = function(server) {
 
               console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
-              Reporting.resetAllTimers();
+              Reporting.addTimer(cli.cid, cli.interval);
 
               res.send(201, cli);
               next();
@@ -489,7 +489,7 @@ module.exports = function(server) {
 
               console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan + " successful.".green);
 
-              Reporting.resetAllTimers();
+              Reporting.addTimer(cli.cid, cli.interval);
 
               res.send(200);
               next();
@@ -603,16 +603,9 @@ module.exports = function(server) {
         );
       }
 
-      Client.remove({ cid: clienttoremove.cid }, function(err, docs){
+      if(clienttoremove){ // if it exists
 
-        if(err){
-          console.error("ERROR".red, err);
-          return next(
-            new errors.InvalidContentError(err.errors.name.message)
-          );
-        }
-
-        MainConf.findOne({ blip: 1 }, function(err, mc){
+        Client.remove({ cid: clienttoremove.cid }, function(err, docs){
 
           if(err){
             console.error("ERROR".red, err);
@@ -620,8 +613,8 @@ module.exports = function(server) {
               new errors.InvalidContentError(err.errors.name.message)
             );
           }
-          console.log(docs);
-          Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: clienttoremove.cid } }, function(err, doc){
+
+          MainConf.findOne({ blip: 1 }, function(err, mc){
 
             if(err){
               console.error("ERROR".red, err);
@@ -630,18 +623,34 @@ module.exports = function(server) {
               );
             }
 
-            Reporting.resetAllTimers();
+            Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: clienttoremove.cid } }, function(err, doc){
 
-            console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.name.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+              if(err){
+                console.error("ERROR".red, err);
+                return next(
+                  new errors.InvalidContentError(err.errors.name.message)
+                );
+              }
 
-            res.send(204);
-            next();
+              Reporting.removeTimer(clienttoremove.cid);
+
+              console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.name.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+              res.send(204);
+              next();
+
+            });
 
           });
 
         });
 
-      });
+      } else {
+
+        res.send(200);
+        next();
+
+      }
 
     });
 
@@ -679,7 +688,7 @@ module.exports = function(server) {
             );
           }
 
-          Reporting.resetAllTimers();
+          Reporting.removeTimer(req.params.cid);
 
           console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
@@ -718,7 +727,13 @@ module.exports = function(server) {
       console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Client '.yellow + doc.name.cyan + ' reporting from ' + req.connection.remoteAddress.cyan);
 
       if(!doc.enabled){
-        Reporting.resetAllTimers();
+
+        Reporting.addTimer(doc.cid, doc.interval);
+
+      }
+
+      if(doc.missing){
+        Reporting.checkClient(doc.cid);
       }
 
       res.send(200, doc);

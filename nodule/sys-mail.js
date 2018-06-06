@@ -7,7 +7,8 @@ const Recipient = require('../models/recipient');
 
 function sendAlerts(subject, mess){
 
-  Recipient.apiQuery({}, function(err, docs){
+  MainConf.findOne({ blip: 1 }, function(err, mc) {
+
     if(err){
       console.error("ERROR".red, err);
       return next(
@@ -15,27 +16,29 @@ function sendAlerts(subject, mess){
       );
     }
 
-    if(docs != null){ // If there are recpients
+    Config.findOne({ cid: mc.currentconfig }, function(err, configuration) {
 
-      for(var i=0; i < docs.length; i++){
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
 
-        var doc = docs[i];
+      Recipient.apiQuery({}, function(err, docs){
 
-        MainConf.findOne({ blip: 1 }, function(err, mc) {
-          if(err){
-            console.error("ERROR".red, err);
-            return next(
-              new errors.InvalidContentError(err.errors.name.message)
-            );
-          }
+        if(err){
+          console.error("ERROR".red, err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        }
 
-          Config.findOne({ cid: mc.currentconfig }, function(err, configuration) {
-            if(err){
-              console.error("ERROR".red, err);
-              return next(
-                new errors.InvalidContentError(err.errors.name.message)
-              );
-            }
+        if(docs != null){ // If there are recpients
+
+          for(var i=0; i < docs.length; i++){
+
+            let doc = docs[i];
 
             var mailOptions = {
               from: configuration.mailuser,
@@ -58,19 +61,22 @@ function sendAlerts(subject, mess){
             });
 
             transporter.sendMail(mailOptions, function(err, info){
+
               if(err){
                 return console.log("ERROR".red, err);
               }
+
               console.log('Alert Sent to ' + doc.address + ': ' + info.response + ' | Message: ' + mess);
+
             });
 
-          });
+          }
 
-        });
+        }
 
-      }
+      });
 
-    }
+    });
 
   });
 

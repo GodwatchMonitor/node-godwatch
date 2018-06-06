@@ -2,7 +2,7 @@ const Client = require('../models/client');
 const errors = require('restify-errors');
 const SysMail = require('../nodule/sys-mail');
 
-var timers = [];
+var timers = {};
 
 function date_difference(date1, date2){
 
@@ -14,7 +14,30 @@ function date_difference(date1, date2){
 
 }
 
-function check_client(cid){
+function addTimer(cid, interval){
+
+  timers[String(cid)] = setTimeout(function() { checkClient(cid); }, interval);
+
+}
+
+function removeTimer(cid){
+
+  clearTimeout(timers[cid]);
+  delete timers[cid];
+
+}
+
+function resetAllTimers(){
+
+  Object.keys(timers).forEach(function(cid){ clearTimeout(timers[cid]); });
+
+  timers = {};
+
+  initialize();
+
+}
+
+function checkClient(cid){
 
   Client.findOne({ cid: cid }, function(err, client){
 
@@ -39,11 +62,13 @@ function check_client(cid){
     let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
     let datereported = client.datereported;
 
+    let current_interval = timers[client.cid]._idleTimeout;
+
     let dif = date_difference(date, datereported)*60*1000;
 
-    console.log(date, datereported, dif, ' - ', client.interval*client.tolerance);
+    console.log(date, datereported, dif, ' - ', current_interval*client.tolerance);
 
-    if(dif > client.interval*client.tolerance){
+    if(dif > current_interval*client.tolerance){
 
       if(client.timesmissing >= 0){
 
@@ -69,7 +94,7 @@ function check_client(cid){
 
     }
 
-    if(dif > client.interval*client.tolerance || client.timesmissing == -1){
+    if(dif > current_interval*client.tolerance || client.timesmissing == -1){
       ndata.timesmissing = client.timesmissing+1;
     }
 
@@ -89,22 +114,12 @@ function check_client(cid){
 
     });
 
-    clearInterval(timers[client.cid]);
+    clearTimeout(timers[String(client.cid)]);
     if(client.enabled){
-      timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
+      timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
     }
 
   });
-
-}
-
-function resetAllTimers(){
-
-  for(var i = 0; i < timers.length; i++){ clearInterval(timers[i]); }
-
-  timers = [];
-
-  initialize();
 
 }
 
@@ -125,7 +140,7 @@ function initialize(){
 
         console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
 
-        timers[client.cid] = setInterval(function() { check_client(client.cid); }, client.interval);
+        timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
 
         Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
 
@@ -149,8 +164,6 @@ function initialize(){
 
   });
 
-  //setInterval(initialize, 5000);
-
 }
 
-module.exports = {initialize, resetAllTimers}
+module.exports = {initialize, resetAllTimers, checkClient, date_difference, addTimer, removeTimer}
