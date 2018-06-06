@@ -88,6 +88,7 @@ server.listen(config.port, () => {
 
         console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Server is listening on port ' + config.port);
 
+        /*
         secureserver.listen(config.secureport, () => {
           //connect to mongodb
           mongoose.Promise = global.Promise;
@@ -108,7 +109,7 @@ server.listen(config.port, () => {
             console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Secure Server is listening on port ' + config.secureport);
           });
 
-        });
+        });*/
 
       }
 

@@ -229,6 +229,18 @@ SOFTWARE.
           console.log(("  Password: " + newMConf.password).green);
           console.log("\n");
 
+          /*
+          var exec = require('child_process').exec;
+          exec("rs\r\n", function () {
+            if (err) {
+              console.log(`exec error: ${err}`);
+              return;
+            }
+            console.log("Restarting server...");
+            //process.exit(0)
+          });
+          */
+
           cb(null);
 
         });

@@ -57,66 +57,69 @@ function checkClient(cid){
 
     ninterval = client.interval;
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + "CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
+    if(client.enabled){
+      
+      console.log('[MM-DD-YY] hh:mm    '.timestamp + "CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
 
-    let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
-    let datereported = client.datereported;
+      let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
+      let datereported = client.datereported;
 
-    let current_interval = timers[client.cid]._idleTimeout;
+      let current_interval = timers[client.cid]._idleTimeout;
 
-    let dif = date_difference(date, datereported)*60*1000;
+      let dif = date_difference(date, datereported)*60*1000;
 
-    console.log(date, datereported, dif, ' - ', current_interval*client.tolerance);
+      console.log(date, datereported, dif, ' - ', current_interval*client.tolerance);
 
-    if(dif > current_interval*client.tolerance){
+      if(dif > current_interval*client.tolerance){
 
-      if(client.timesmissing >= 0){
+        if(client.timesmissing >= 0){
 
-        console.log('[MM-DD-YY] hh:mm    '.timestamp + "ALERT: ".red + "client ".yellow + client.name.cyan + " has not reported in the specified interval (" + String(client.interval).cyan + ")");
+          console.log('[MM-DD-YY] hh:mm    '.timestamp + "ALERT: ".red + "client ".yellow + client.name.cyan + " has not reported in the specified interval (" + String(client.interval).cyan + ")");
 
-        if(!client.missing){ //Only send alert the first time
+          if(!client.missing){ //Only send alert the first time
 
-          SysMail.sendAlerts("Godwatch Alert", client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
-          ndata.missing = true;
+            SysMail.sendAlerts("Godwatch Alert", client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+            ndata.missing = true;
+
+          }
+
+        }
+
+      } else {
+
+        if(client.missing){ //Send reconnection alert
+
+          SysMail.sendAlerts("Godwatch Alert", client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+          ndata.missing = false;
 
         }
 
       }
 
-    } else {
-
-      if(client.missing){ //Send reconnection alert
-
-        SysMail.sendAlerts("Godwatch Alert", client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
-        ndata.missing = false;
-
+      if(dif > current_interval*client.tolerance || client.timesmissing == -1){
+        ndata.timesmissing = client.timesmissing+1;
       }
 
-    }
+      Client.findOneAndUpdate({ cid: cid }, { $set: ndata }, function(err, clinew){
 
-    if(dif > current_interval*client.tolerance || client.timesmissing == -1){
-      ndata.timesmissing = client.timesmissing+1;
-    }
+        if(err){
+          console.error("ERROR".red, err);
+          return next(
+            new errors.InvalidContentError(err.errors.name.message)
+          );
+        } else if (!client){
+          console.error("ERROR".red, err);
+          return new errors.ResourceNotFoundError(
+              'The resource you requested could not be found.'
+            )
+        }
 
-    Client.findOneAndUpdate({ cid: cid }, { $set: ndata }, function(err, clinew){
+      });
 
-      if(err){
-        console.error("ERROR".red, err);
-        return next(
-          new errors.InvalidContentError(err.errors.name.message)
-        );
-      } else if (!client){
-        console.error("ERROR".red, err);
-        return new errors.ResourceNotFoundError(
-            'The resource you requested could not be found.'
-          )
-      }
+      clearTimeout(timers[String(client.cid)]);
 
-    });
-
-    clearTimeout(timers[String(client.cid)]);
-    if(client.enabled){
       timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
+
     }
 
   });
