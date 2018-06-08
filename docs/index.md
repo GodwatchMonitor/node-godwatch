@@ -33,6 +33,8 @@ Response time for the missing client coming back online is even faster. After th
 
 Using the Godwatch Administrator, a python application for changing the settings of Godwatch, you can view clients, change intervals, manage alert recipients, and change SMTP settings. Settings propogate to clients within 1 interval.
 
+Godwatch also automatically pushes client updates from itself to monitored machines.
+
 Godwatch is modular, meaning each server instance can be enabled to act as a client and report to another dashboard:
 ```
         Main Server
