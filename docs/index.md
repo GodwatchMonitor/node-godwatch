@@ -4,8 +4,6 @@ layout: default
 
 # Godwatch - Uptime Monitor
 
-Many monitoring dashboards for IT professionals give you the ability to receive alerts when one of your systems goes offline, along with a host of other, potentially unnecessary features. Godwatch is a down-to-earth single feature uptime monitor, designed to be run in-house with plug-and-play software. And best of all, it's open-source and free forever.
-
 ## What is Godwatch?
 Godwatch is a remote system uptime monitor running in node.js on the server side and Python on the client side.
 
