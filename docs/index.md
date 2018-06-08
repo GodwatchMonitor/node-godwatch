@@ -2,9 +2,36 @@
 layout: default
 ---
 
-# Godwatch for node.js
+# Godwatch - Uptime Monitor
 
-Godwatch is a remote system uptime monitor running with node.js.
+Many monitoring dashboards for IT professionals give you the ability to receive alerts when one of your systems goes offline, along with a host of other, potentially unnecessary features. Godwatch is a down-to-earth single feature uptime monitor, designed to be run in-house with plug-and-play software. And best of all, it's open-source and free forever.
+
+## What is Godwatch?
+Godwatch is a remote system uptime monitor running in node.js on the server side and Python on the client side.
+
+Most other simple uptime monitors work externally, by pinging or performing other tests on a network from an external server:
+```
+Monitor ---------> Network
+```
+
+Godwatch works in reverse, by having monitored machines report to the server at a set interval:
+```
+Monitor <--------- System
+```
+
+Not only is this system more reliable, but it also allows for the individual monitoring of multiple machines on the same network. From the alerts sent out by Godwatch the IT technician can determine for himself whether or not the whole network is down or simply one machine.
+
+## How does it work?
+
+Godwatch runs as a node.js application on a server machine that is opened up to the internet (ports are configurable but the default is 7001). Client software that is installed on monitored machines will report to the server at a set interval.
+
+Each client entry on the server has a timer associated with it. When the timer runs out, the server checks the difference between the current time and the last time the client reported. If the difference is greater than the interval, Godwatch flags it as missing and sends out an alert.
+
+Using this system you will know that your system is down no later than twice the reporting interval. Recommended and default interval is one minute, meaning you will get an alert within two minutes (usually much less) if the client hasn't reported.
+
+Response time for the missing client coming back online is even faster. After the application initializes, it immediately reports to the server, which will immediately send a reconnection notification if the client was previously flagged as missing.
+
+Using the Godwatch Administrator, a python application for changing the settings of Godwatch, you can view clients, change intervals, manage alert recipients, and change SMTP settings. Settings propogate to clients within 1 interval.
 
 Godwatch is modular, meaning each server instance can be enabled to act as a client and report to another dashboard:
 ```
