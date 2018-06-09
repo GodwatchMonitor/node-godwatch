@@ -39,7 +39,7 @@ module.exports = function(server) {
 
       console.log('[MM-DD-YY] hh:mm    '.timestamp + 'LIST '.green + 'all configuration'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful'.green);
 
-      res.send(docs);
+      res.send(200, docs);
       next();
 
     });
@@ -58,10 +58,19 @@ module.exports = function(server) {
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'configuration '.yellow + doc.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      if(!doc){
 
-      res.send(doc);
-      next();
+        res.send(404);
+        next();
+
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'configuration '.yellow + doc.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+        res.send(200, doc);
+        next();
+
+      }
 
     });
 
@@ -86,18 +95,21 @@ module.exports = function(server) {
         return next(
           new errors.InvalidContentError(err.errors.name.message)
         );
-      } else if (!doc){
-        return next(
-          new errors.ResourceNotFoundError(
-            'The resource you requested could not be found.'
-          )
-        );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'configuration '.yellow + doc.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      if(!doc){
 
-      res.send(200, doc);
-      next();
+        res.send(404);
+        next();
+
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'configuration '.yellow + doc.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+        res.send(200, doc);
+        next();
+
+      }
 
     });
 
@@ -106,19 +118,48 @@ module.exports = function(server) {
   // DELETE CONFIG
   server.del('/config/:cid', innerAuth.adminAuth, (req, res, next) => {
 
-    Config.remove({ cid: req.params.cid }, function(err) {
+    Config.findOne({ cid: req.params.cid }, function(err, configtoremove){
 
       if(err){
-        console.error(err);
+        console.error("ERROR".red, err);
         return next(
           new errors.InvalidContentError(err.errors.name.message)
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'configuration '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      if(configtoremove){ // if it does exist
 
-      res.send(204);
-      next();
+        Config.remove({ cid: req.params.cid }, function(err, doc) {
+
+          if(err){
+            console.error(err);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          }
+
+          if(!doc){
+
+            res.send(404);
+            next();
+
+          } else {
+
+            console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'configuration '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+            res.send(204);
+            next();
+
+          }
+
+        });
+
+      } else {
+
+        res.send(404);
+        next();
+
+      }
 
     });
 
@@ -219,10 +260,19 @@ module.exports = function(server) {
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful'.green);
+      if(!doc){
 
-      res.send(200, doc);
-      next();
+        res.send(404);
+        next();
+
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful'.green);
+
+        res.send(200, doc);
+        next();
+
+      }
 
     });
 
@@ -268,18 +318,21 @@ module.exports = function(server) {
         return next(
           new errors.InvalidContentError(err.errors.name.message)
         );
-      } else if (!doc){
-        return next(
-          new errors.ResourceNotFoundError(
-            'The resource you requested could not be found.'
-          )
-        );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      if(!doc){
 
-      res.send(200, doc);
-      next();
+        res.send(404);
+        next();
+
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+        res.send(200, doc);
+        next();
+
+      }
 
     });
 
@@ -288,7 +341,7 @@ module.exports = function(server) {
   // DELETE RECIPIENT
   server.del('/recipients/:rid', innerAuth.adminAuth, (req, res, next) => {
 
-    Recipient.remove({ rid: req.params.rid }, function(err, docs){
+    Recipient.findOne({ rid: req.params.rid }, function(err, recipienttoremove){
 
       if(err){
         console.error("ERROR".red, err);
@@ -297,16 +350,9 @@ module.exports = function(server) {
         );
       }
 
-      MainConf.findOne({ blip: 1 }, function(err, mc){
+      if(recipienttoremove){ // if it does exist
 
-        if(err){
-          console.error("ERROR".red, err);
-          return next(
-            new errors.InvalidContentError(err.errors.name.message)
-          );
-        }
-
-        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { recipients: req.params.rid } }, function(err, doc){
+        Recipient.remove({ rid: req.params.rid }, function(err, docs){
 
           if(err){
             console.error("ERROR".red, err);
@@ -315,14 +361,41 @@ module.exports = function(server) {
             );
           }
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+          MainConf.findOne({ blip: 1 }, function(err, mc){
 
-          res.send(204);
-          next();
+            if(err){
+              console.error("ERROR".red, err);
+              return next(
+                new errors.InvalidContentError(err.errors.name.message)
+              );
+            }
+
+            Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { recipients: req.params.rid } }, function(err, doc){
+
+              if(err){
+                console.error("ERROR".red, err);
+                return next(
+                  new errors.InvalidContentError(err.errors.name.message)
+                );
+              }
+
+              console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+              res.send(204);
+              next();
+
+            });
+
+          });
 
         });
 
-      });
+      } else {
+
+        res.send(404);
+        next();
+
+      }
 
     });
 
@@ -525,10 +598,19 @@ module.exports = function(server) {
         );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      if(!doc){
 
-      res.send(200, doc);
-      next();
+        res.send(404);
+        next();
+
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+        res.send(200, doc);
+        next();
+
+      }
 
     });
 
@@ -574,18 +656,21 @@ module.exports = function(server) {
         return next(
           new errors.InvalidContentError(err.errors.name.message)
         );
-      } else if (!doc){
-        return next(
-          new errors.ResourceNotFoundError(
-            'The resource you requested could not be found.'
-          )
-        );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      if(!doc){
 
-      res.send(200, doc);
-      next();
+        res.send(404);
+        next();
+
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+        res.send(200, doc);
+        next();
+
+      }
 
     });
 
@@ -647,7 +732,7 @@ module.exports = function(server) {
 
       } else {
 
-        res.send(200);
+        res.send(200); // This line needs to send 200 or the uninstaller can't continue. This allows for deleting clients from the console as well as from the uninstaller.
         next();
 
       }
@@ -659,9 +744,7 @@ module.exports = function(server) {
   // DELETE CLIENT
   server.del('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + ('client ' + req.params.cid).yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
-    Client.remove({ cid: req.params.cid }, function(err, docs){
+    Client.findOne({ cid: req.params.cid }, function(err, clienttoremove){
 
       if(err){
         console.error("ERROR".red, err);
@@ -670,16 +753,9 @@ module.exports = function(server) {
         );
       }
 
-      MainConf.findOne({ blip: 1 }, function(err, mc){
+      if(clienttoremove){ // if it exists
 
-        if(err){
-          console.error("ERROR".red, err);
-          return next(
-            new errors.InvalidContentError(err.errors.name.message)
-          );
-        }
-
-        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: req.params.cid } }, function(err, doc){
+        Client.remove({ cid: req.params.cid }, function(err, docs){
 
           if(err){
             console.error("ERROR".red, err);
@@ -688,16 +764,43 @@ module.exports = function(server) {
             );
           }
 
-          Reporting.removeTimer(req.params.cid);
+          MainConf.findOne({ blip: 1 }, function(err, mc){
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+            if(err){
+              console.error("ERROR".red, err);
+              return next(
+                new errors.InvalidContentError(err.errors.name.message)
+              );
+            }
 
-          res.send(204);
-          next();
+            Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: req.params.cid } }, function(err, doc){
+
+              if(err){
+                console.error("ERROR".red, err);
+                return next(
+                  new errors.InvalidContentError(err.errors.name.message)
+                );
+              }
+
+              Reporting.removeTimer(req.params.cid);
+
+              console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+              res.send(204);
+              next();
+
+            });
+
+          });
 
         });
 
-      });
+      } else {
+
+        res.send(404);
+        next();
+
+      }
 
     });
 
@@ -716,28 +819,31 @@ module.exports = function(server) {
         return next(
           new errors.InvalidContentError(err.errors.name.message)
         );
-      } else if (!doc){
-        return next(
-          new errors.ResourceNotFoundError(
-            'The resource you requested could not be found.'
-          )
-        );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Client '.yellow + doc.name.cyan + ' reporting from ' + req.connection.remoteAddress.cyan);
+      if(!doc){
 
-      if(!doc.enabled){
+        res.send(404);
+        next();
 
-        Reporting.addTimer(doc.cid, doc.interval);
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Client '.yellow + doc.name.cyan + ' reporting from ' + req.connection.remoteAddress.cyan);
+
+        if(!doc.enabled){
+
+          Reporting.addTimer(doc.cid, doc.interval);
+
+        }
+
+        if(doc.missing){
+          Reporting.checkClient(doc.cid);
+        }
+
+        res.send(200, doc);
+        next();
 
       }
-
-      if(doc.missing){
-        Reporting.checkClient(doc.cid);
-      }
-
-      res.send(200, doc);
-      next();
 
     });
 
@@ -753,18 +859,21 @@ module.exports = function(server) {
         return next(
           new errors.InvalidContentError(err.errors.name.message)
         );
-      } else if (!doc){
-        return next(
-          new errors.ResourceNotFoundError(
-            'The resource you requested could not be found.'
-          )
-        );
       }
 
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + doc.name.cyan + ' settings request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+      if(!doc){
 
-      res.send(200, doc);
-      next();
+        res.send(404);
+        next();
+
+      } else {
+
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + doc.name.cyan + ' settings request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+
+        res.send(200, doc);
+        next();
+
+      }
 
     });
 

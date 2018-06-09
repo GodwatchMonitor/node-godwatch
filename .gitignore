@@ -1,5 +1,7 @@
 # Exclude Database
 db/*
+ssl/*
 
 # Keep .gitkeep
 !db/.gitkeep
+!ssl/.gitkeep
