@@ -30,6 +30,10 @@ const ConfigSchema = new mongoose.Schema(
     recipients: {
       type: [Number],
     },
+    clientversion: {
+      type: Number,
+      required: false
+    },
     mailhost: { type: String },
     mailport: { type: Number },
     securemail: { type: Boolean },

@@ -48,6 +48,10 @@ const ClientSchema = new mongoose.Schema(
     enabled: {
       type: Boolean,
       required: true,
+    },
+    version: {
+      type: Number,
+      required: false,
     }
   },
   { minimize: false }

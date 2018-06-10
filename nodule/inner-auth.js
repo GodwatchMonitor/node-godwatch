@@ -203,6 +203,7 @@ SOFTWARE.
       let newConf = new Config(
         {
           reporting: false,
+          clientversion: 0.1,
           mailhost: inMailhost,
           mailport: inMailport,
           securemail: inSecuremail,

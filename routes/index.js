@@ -4,6 +4,7 @@ const restify = require('restify-plugins');
 const mongoose = require('mongoose');
 const randomstring = require('randomstring');
 const qs = require('qs');
+const fs = require('fs');
 
 const colors = require('colors');
 const timestamp = require('console-timestamp');
@@ -17,6 +18,90 @@ const Client = require('../models/client');
 const innerAuth = require('../nodule/inner-auth');
 const sysMail = require('../nodule/sys-mail');
 const Reporting = require('../nodule/reporting');
+
+function removeConfigRecipients(rid, callback){
+
+  MainConf.findOne({ blip: 1 }, function(err, mc){
+
+    if(err){
+      console.error("ERROR".red, err);
+      return next(
+        new errors.InvalidContentError(err.errors.name.message)
+      );
+    }
+
+    Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { recipients: rid } }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      callback(err);
+
+    });
+
+  });
+
+}
+
+function addConfigRecipients(rid, callback){
+
+  MainConf.findOne({ blip: 1 }, function(err, mc){
+
+    if(err){
+      console.error("ERROR".red, err);
+      return next(
+        new errors.InvalidContentError(err.errors.name.message)
+      );
+    }
+
+    Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { recipients: rid } }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      callback(err);
+
+    });
+
+  });
+
+}
+
+function getConfig(callback){
+
+  MainConf.findOne({ blip: 1 }, function(err, mc){
+
+    if(err){
+      console.error("ERROR".red, err);
+      return next(
+        new errors.InvalidContentError(err.errors.name.message)
+      );
+    }
+
+    Config.findOne({ cid: mc.currentconfig }, function(err, doc){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      callback(err, doc);
+
+    });
+
+  });
+
+}
 
 module.exports = function(server) {
 
@@ -217,7 +302,7 @@ module.exports = function(server) {
         next();
       }
 
-      MainConf.findOne({ blip: 1 }, function(err, mc){
+      addConfigRecipients(recip.rid, function(err){
 
         if(err){
           console.error("ERROR".red, err);
@@ -226,21 +311,10 @@ module.exports = function(server) {
           );
         }
 
-        Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { recipients: recip.rid } }, function(err, doc){
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'recipient'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
-          if(err){
-            console.error("ERROR".red, err);
-            return next(
-              new errors.InvalidContentError(err.errors.name.message)
-            );
-          }
-
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'recipient'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
-
-          res.send(201, recip);
-          next();
-
-        });
+        res.send(201, recip);
+        next();
 
       });
 
@@ -361,30 +435,12 @@ module.exports = function(server) {
             );
           }
 
-          MainConf.findOne({ blip: 1 }, function(err, mc){
+          removeConfigRecipients(req.params.rid, function(err){
 
-            if(err){
-              console.error("ERROR".red, err);
-              return next(
-                new errors.InvalidContentError(err.errors.name.message)
-              );
-            }
+            console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
-            Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { recipients: req.params.rid } }, function(err, doc){
-
-              if(err){
-                console.error("ERROR".red, err);
-                return next(
-                  new errors.InvalidContentError(err.errors.name.message)
-                );
-              }
-
-              console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
-
-              res.send(204);
-              next();
-
-            });
+            res.send(204);
+            next();
 
           });
 
@@ -870,14 +926,52 @@ module.exports = function(server) {
 
         console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + doc.name.cyan + ' settings request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
-        res.send(200, doc);
-        next();
+        getConfig(function(err, conf){
+
+          if(err){
+            console.error("ERROR".red, err);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          }
+
+          doc.version = conf.clientversion;
+
+          res.send(200, doc);
+          next();
+
+        });
 
       }
 
     });
 
   });
+
+  // GET CURRENT EXECUTABLE
+  server.get('/clients/executable', innerAuth.adminAuth, (req, res, next) => {
+
+    res.setHeader('Content-disposition', 'attachment; filename=newver.exe');
+
+    //console.log("Getting EXE");
+
+    getConfig(function(err, conf){
+
+      if(err){
+        console.error("ERROR".red, err);
+        return next(
+          new errors.InvalidContentError(err.errors.name.message)
+        );
+      }
+
+      var filestream = fs.createReadStream('./static/client'+String(conf.currentversion)+'.exe');
+      filestream.pipe(res);
+      next();
+
+    });
+
+  });
+
 
   /*
     RESET EVERYTHING

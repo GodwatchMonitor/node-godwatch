@@ -88,6 +88,8 @@ server.listen(config.port, () => {
 
         console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Server is listening on port ' + config.port);
 
+        Reporting.initialize();
+        
         /*
         secureserver.listen(config.secureport, () => {
           //connect to mongodb
@@ -96,8 +98,6 @@ server.listen(config.port, () => {
           autoIncrement.initialize(mongoose.connection);
 
           const db = mongoose.connection;
-
-          Reporting.initialize();
 
           db.on('error', (err) => {
             console.error(err);
