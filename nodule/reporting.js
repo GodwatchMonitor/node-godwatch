@@ -46,79 +46,116 @@ function checkClient(cid){
       return next(
         new errors.InvalidContentError(err.errors.name.message)
       );
-    } else if (!client){
-      console.error("ERROR".red, err);
+    }
+
+    if(!client){
+
+      console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
       return new errors.ResourceNotFoundError(
           'The resource you requested could not be found.'
         )
-    }
 
-    ndata = {};
+    } else {
 
-    ninterval = client.interval;
+      ndata = {};
 
-    if(client.enabled){
-      
-      console.log('[MM-DD-YY] hh:mm    '.timestamp + "CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
+      ninterval = client.interval;
 
-      let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
-      let datereported = client.datereported;
+      if(client.enabled){
 
-      let current_interval = timers[client.cid]._idleTimeout;
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + "CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
 
-      let dif = date_difference(date, datereported)*60*1000;
+        let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
+        let datereported = client.datereported;
 
-      console.log(date, datereported, dif, ' - ', current_interval*client.tolerance);
+        let current_interval = timers[client.cid]._idleTimeout;
 
-      if(dif > current_interval*client.tolerance){
+        console.log("                    \u2502 ".green + "Comparing current time with last time reported...".gray);
 
-        if(client.timesmissing >= 0){
+        let dif = date_difference(date, datereported)*60*1000;
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + "ALERT: ".red + "client ".yellow + client.name.cyan + " has not reported in the specified interval (" + String(client.interval).cyan + ")");
+        console.log("                    \u2502 ".green + "Client has not reported in ".gray + String(dif).cyan + " milliseconds.".gray);
 
-          if(!client.missing){ //Only send alert the first time
+        if(dif > current_interval*client.tolerance){
 
-            SysMail.sendAlerts("Godwatch Alert", client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
-            ndata.missing = true;
+          console.log("                    \u2502 ".green + "Client has not reported in the specified time frame.".gray);
+
+          if(client.timesmissing >= 0){
+
+            console.log("                    \u2502 ".green + "ALERT: Client is missing. It has either lost network connectivity, lost power, or had the Godwatch Client exited.".red);
+
+            if(!client.missing){ //Only send alert the first time
+
+              console.log("                    \u2502 ".green + "Sending alert...".gray);
+
+              SysMail.sendAlerts("Godwatch Alert", client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+              ndata.missing = true;
+
+            } else {
+
+              console.log("                    \u2502 ".green + "Client was already flagged as missing. No alert will be sent.".gray);
+
+            }
+
+          } else {
+
+            console.log("                    \u2502 ".green + "Client is currently in grace period due to a server restart, overlooking.".gray);
+
+          }
+
+        } else {
+
+          console.log("                    \u2502 ".green + "Client is within specified interval.".gray);
+
+          if(client.missing){ //Send reconnection alert
+
+            console.log("                    \u2502 ".green + "Client was previously missing, sending reconnection alert...".gray);
+
+            SysMail.sendAlerts("Godwatch Alert", client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
+
+            ndata.missing = false;
 
           }
 
         }
 
+        if(dif > current_interval*client.tolerance || client.timesmissing == -1){
+
+          ndata.timesmissing = client.timesmissing+1;
+
+        }
+
+        Client.findOneAndUpdate({ cid: cid }, { $set: ndata }, function(err, clinew){
+
+          if(err){
+            console.log("                    \u2514 ".green + "ERROR".red, err.red);
+            return next(
+              new errors.InvalidContentError(err.errors.name.message)
+            );
+          }
+
+          if(!clinew){
+            console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+            return new errors.ResourceNotFoundError(
+                'The resource you requested could not be found.'
+              )
+          }
+
+        });
+
+        console.log("                    \u2502 ".green + "Resetting timer...".gray);
+
+        clearTimeout(timers[String(client.cid)]);
+
+        timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
+
+        console.log("                    \u2514 ".green + "SUCCESS\n".green);
+
       } else {
 
-        if(client.missing){ //Send reconnection alert
-
-          SysMail.sendAlerts("Godwatch Alert", client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
-          ndata.missing = false;
-
-        }
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client is not enabled.\n".gray);
 
       }
-
-      if(dif > current_interval*client.tolerance || client.timesmissing == -1){
-        ndata.timesmissing = client.timesmissing+1;
-      }
-
-      Client.findOneAndUpdate({ cid: cid }, { $set: ndata }, function(err, clinew){
-
-        if(err){
-          console.error("ERROR".red, err);
-          return next(
-            new errors.InvalidContentError(err.errors.name.message)
-          );
-        } else if (!client){
-          console.error("ERROR".red, err);
-          return new errors.ResourceNotFoundError(
-              'The resource you requested could not be found.'
-            )
-        }
-
-      });
-
-      clearTimeout(timers[String(client.cid)]);
-
-      timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
 
     }
 
@@ -127,6 +164,8 @@ function checkClient(cid){
 }
 
 function initialize(){
+
+  console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "all timers...".yellow);
 
   Client.apiQuery({}, function(err, docs){
 
@@ -137,13 +176,13 @@ function initialize(){
       );
     }
 
+    var i = 0;
+
     docs.forEach(function(client){
 
+      i += 1;
+
       if(client.enabled){
-
-        console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
-
-        timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
 
         Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
 
@@ -152,11 +191,25 @@ function initialize(){
             return next(
               new errors.InvalidContentError(err.errors.name.message)
             );
-          } else if (!client){
-            console.error("ERROR".red, err);
+          }
+
+          if(!clinew){
+
+            console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
             return new errors.ResourceNotFoundError(
                 'The resource you requested could not be found.'
               )
+
+          } else {
+
+            timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
+
+            console.log("                    \u2502 ".green + "Initialized ".gray + client.name.cyan + " at interval ".gray + String(client.interval).cyan);
+
+          }
+
+          if(i == docs.length){
+            console.log("                    \u2514 ".green + "SUCCESS: ".green + String(docs.length).gray + " timers initialized.\n".gray);
           }
 
         });

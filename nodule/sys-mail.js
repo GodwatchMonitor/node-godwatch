@@ -66,7 +66,7 @@ function sendAlerts(subject, mess){
                 return console.log("ERROR".red, err);
               }
 
-              console.log('Alert Sent to ' + doc.address + ': ' + info.response + ' | Message: ' + mess);
+              //console.log('Alert Sent to ' + doc.address + ': ' + info.response + ' | Message: ' + mess);
 
             });
 

@@ -86,10 +86,10 @@ server.listen(config.port, () => {
 
       if(!err){
 
-        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Server is listening on port ' + config.port);
+        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Server is listening on port ' + config.port + '\n');
 
         Reporting.initialize();
-        
+
         /*
         secureserver.listen(config.secureport, () => {
           //connect to mongodb

@@ -16,10 +16,6 @@ const Changer = require('../nodule/changer');
 
 module.exports = function(server) {
 
-  /*
-    CLIENT ROUTES
-  */
-
   // CREATE CLIENT
   server.post('/clients', innerAuth.adminAuth, (req, res, next) => {
 
@@ -96,7 +92,7 @@ module.exports = function(server) {
 
             res.send(201, cli);
 
-            console.log("                    \u2514 ".green + "SUCCESS".green);
+            console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
             next();
 
@@ -106,7 +102,7 @@ module.exports = function(server) {
 
       } else {
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Name exists in database.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Name exists in database.\n".gray);
 
         res.send(400);
         next();
@@ -195,7 +191,7 @@ module.exports = function(server) {
 
             res.send(200);
 
-            console.log("                    \u2514 ".green + "SUCCESS".green);
+            console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
             next();
 
@@ -205,7 +201,7 @@ module.exports = function(server) {
 
       } else {
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Name exists in database.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Name exists in database.\n".gray);
 
         res.send(400);
         next();
@@ -236,7 +232,7 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
 
         next();
 
@@ -246,7 +242,7 @@ module.exports = function(server) {
 
         res.send(200, doc);
 
-        console.log("                    \u2514 ".green + "SUCCESS".green);
+        console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
         next();
 
@@ -309,7 +305,7 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
 
         next();
 
@@ -319,7 +315,7 @@ module.exports = function(server) {
 
         res.send(200, doc);
 
-        console.log("                    \u2514 ".green + "SUCCESS".green);
+        console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
         next();
 
@@ -375,7 +371,7 @@ module.exports = function(server) {
 
             res.send(204);
 
-            console.log("                    \u2514 ".green + "SUCCESS".green);
+            console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
             next();
 
@@ -387,7 +383,7 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
 
         next();
 
@@ -443,7 +439,7 @@ module.exports = function(server) {
 
             res.send(204);
 
-            console.log("                    \u2514 ".green + "SUCCESS".green);
+            console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
             next();
 
@@ -455,7 +451,7 @@ module.exports = function(server) {
 
         res.send(200); // This line needs to send 200 or the uninstaller can't continue. This allows for deleting clients from the console as well as from the uninstaller. This shouldn't cause a conflict with an active client becuase the fields auto-fill in the uninstaller.
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
 
         next();
 
@@ -487,7 +483,7 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
 
         next();
 
@@ -513,7 +509,7 @@ module.exports = function(server) {
 
         res.send(200, doc);
 
-        console.log("                    \u2514 ".green + "SUCCESS".green);
+        console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
         next();
 
@@ -543,7 +539,7 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.".gray);
+        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
 
         next();
 
@@ -566,7 +562,7 @@ module.exports = function(server) {
 
           res.send(200, doc);
 
-          console.log("                    \u2514 ".green + "SUCCESS".green);
+          console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
           next();
 
@@ -600,7 +596,7 @@ module.exports = function(server) {
 
       filestream.pipe(res);
 
-      console.log("                    \u2514 ".green + "SUCCESS".green);
+      console.log("                    \u2514 ".green + "SUCCESS\n".green);
 
       next();
 
