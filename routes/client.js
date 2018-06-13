@@ -36,7 +36,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -80,7 +80,7 @@ module.exports = function(server) {
             if(err){
               console.log("                    \u2514 ".green + "ERROR".red, err.red);
               return next(
-                new errors.InvalidContentError(err.errors.name.message)
+                new errors.InvalidContentError(err)
               );
             }
 
@@ -133,7 +133,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -179,7 +179,7 @@ module.exports = function(server) {
             if(err){
               console.log("                    \u2514 ".green + "ERROR".red, err.red);
               return next(
-                new errors.InvalidContentError(err.errors.name.message)
+                new errors.InvalidContentError(err)
               );
             }
 
@@ -224,7 +224,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -262,7 +262,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -297,7 +297,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -337,7 +337,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -350,7 +350,7 @@ module.exports = function(server) {
           if(err){
             console.log("                    \u2514 ".green + "ERROR".red, err.red);
             return next(
-              new errors.InvalidContentError(err.errors.name.message)
+              new errors.InvalidContentError(err)
             );
           }
 
@@ -361,7 +361,7 @@ module.exports = function(server) {
             if(err){
               console.log("                    \u2514 ".green + "ERROR".red, err.red);
               return next(
-                new errors.InvalidContentError(err.errors.name.message)
+                new errors.InvalidContentError(err)
               );
             }
 
@@ -405,7 +405,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -418,7 +418,7 @@ module.exports = function(server) {
           if(err){
             console.log("                    \u2514 ".green + "ERROR".red, err.red);
             return next(
-              new errors.InvalidContentError(err.errors.name.message)
+              new errors.InvalidContentError(err)
             );
           }
 
@@ -429,7 +429,7 @@ module.exports = function(server) {
             if(err){
               console.log("                    \u2514 ".green + "ERROR".red, err.red);
               return next(
-                new errors.InvalidContentError(err.errors.name.message)
+                new errors.InvalidContentError(err)
               );
             }
 
@@ -475,7 +475,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -531,7 +531,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -552,7 +552,7 @@ module.exports = function(server) {
           if(err){
             console.log("                    \u2514 ".green + "ERROR".red, err.red);
             return next(
-              new errors.InvalidContentError(err.errors.name.message)
+              new errors.InvalidContentError(err)
             );
           }
 
@@ -588,7 +588,7 @@ module.exports = function(server) {
       if(err){
         console.log("                    \u2514 ".green + "ERROR".red, err.red);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 

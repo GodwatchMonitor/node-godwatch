@@ -15,7 +15,7 @@ function checkAdminPassword(password, username, cb){
     if(err){
       console.error(err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -54,7 +54,7 @@ const userAuth = function(req, res, next){
     if(err) {
       console.error(err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
     if(doc != null){
@@ -62,7 +62,7 @@ const userAuth = function(req, res, next){
         if(err) {
           console.error(err);
           return next(
-            new errors.InvalidContentError(err.errors.name.message)
+            new errors.InvalidContentError(err)
           );
         }
 
@@ -110,7 +110,7 @@ const checkSetup = function(cb){
     if(err){
       console.error(err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 

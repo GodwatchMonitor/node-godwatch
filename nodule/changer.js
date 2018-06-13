@@ -17,7 +17,7 @@ function removeConfigRecipients(rid, callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -26,7 +26,7 @@ function removeConfigRecipients(rid, callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -45,7 +45,7 @@ function addConfigRecipients(rid, callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -54,7 +54,7 @@ function addConfigRecipients(rid, callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -73,7 +73,7 @@ function removeConfigClients(cid, callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -82,7 +82,7 @@ function removeConfigClients(cid, callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -101,7 +101,7 @@ function addConfigClients(cid, callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -110,7 +110,7 @@ function addConfigClients(cid, callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -129,7 +129,7 @@ function getConfig(callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -138,7 +138,7 @@ function getConfig(callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 

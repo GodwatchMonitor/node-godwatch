@@ -12,7 +12,7 @@ function sendAlerts(subject, mess){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -21,7 +21,7 @@ function sendAlerts(subject, mess){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -30,7 +30,7 @@ function sendAlerts(subject, mess){
         if(err){
           console.error("ERROR".red, err);
           return next(
-            new errors.InvalidContentError(err.errors.name.message)
+            new errors.InvalidContentError(err)
           );
         }
 
@@ -48,6 +48,7 @@ function sendAlerts(subject, mess){
             };
 
             var transporter = nodemailer.createTransport({
+              name: 'Godwatch',
               host: configuration.mailhost,
               port: configuration.mailport,
               secure: configuration.securemail,

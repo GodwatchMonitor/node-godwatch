@@ -44,7 +44,7 @@ function checkClient(cid){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -130,7 +130,7 @@ function checkClient(cid){
           if(err){
             console.log("                    \u2514 ".green + "ERROR".red, err.red);
             return next(
-              new errors.InvalidContentError(err.errors.name.message)
+              new errors.InvalidContentError(err)
             );
           }
 
@@ -172,7 +172,7 @@ function initialize(){
     if(err){
       console.log("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -189,7 +189,7 @@ function initialize(){
           if(err){
             console.error("ERROR".red, err);
             return next(
-              new errors.InvalidContentError(err.errors.name.message)
+              new errors.InvalidContentError(err)
             );
           }
 

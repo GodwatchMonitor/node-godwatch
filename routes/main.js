@@ -26,7 +26,7 @@ function removeConfigRecipients(rid, callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -35,7 +35,7 @@ function removeConfigRecipients(rid, callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -54,7 +54,7 @@ function addConfigRecipients(rid, callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -63,7 +63,7 @@ function addConfigRecipients(rid, callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -82,7 +82,7 @@ function getConfig(callback){
     if(err){
       console.error("ERROR".red, err);
       return next(
-        new errors.InvalidContentError(err.errors.name.message)
+        new errors.InvalidContentError(err)
       );
     }
 
@@ -91,7 +91,7 @@ function getConfig(callback){
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -121,7 +121,7 @@ module.exports = function(server) {
       if(err){
         console.error(err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 

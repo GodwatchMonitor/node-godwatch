@@ -40,7 +40,7 @@ module.exports = function(server) {
         if(err){
           console.error("ERROR".red, err);
           return next(
-            new errors.InvalidContentError(err.errors.name.message)
+            new errors.InvalidContentError(err)
           );
         }
 
@@ -63,7 +63,7 @@ module.exports = function(server) {
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -93,7 +93,7 @@ module.exports = function(server) {
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -123,7 +123,7 @@ module.exports = function(server) {
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -153,7 +153,7 @@ module.exports = function(server) {
       if(err){
         console.error("ERROR".red, err);
         return next(
-          new errors.InvalidContentError(err.errors.name.message)
+          new errors.InvalidContentError(err)
         );
       }
 
@@ -164,7 +164,7 @@ module.exports = function(server) {
           if(err){
             console.error("ERROR".red, err);
             return next(
-              new errors.InvalidContentError(err.errors.name.message)
+              new errors.InvalidContentError(err)
             );
           }
 
