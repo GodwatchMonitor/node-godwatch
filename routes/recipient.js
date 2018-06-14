@@ -10,7 +10,8 @@ const Recipient = require('../models/recipient');
 
 //Nodules
 const innerAuth = require('../nodule/inner-auth');
-const Changer = require('../nodule/changer');
+const Configurate = require('../nodule/configurate');
+const Bunyan = require('../nodule/bunyan');
 
 module.exports = function(server) {
 
@@ -35,7 +36,7 @@ module.exports = function(server) {
         next();
       }
 
-      Changer.addConfigRecipients(recip.rid, function(err){
+      Configurate.addConfigRecipients(recip.rid, function(err){
 
         if(err){
           console.error("ERROR".red, err);
@@ -168,7 +169,7 @@ module.exports = function(server) {
             );
           }
 
-          Changer.removeConfigRecipients(req.params.rid, function(err){
+          Configurate.removeConfigRecipients(req.params.rid, function(err){
 
             console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'recipient '.yellow + req.params.rid.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 

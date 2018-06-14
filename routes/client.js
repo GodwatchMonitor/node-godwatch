@@ -12,29 +12,31 @@ const Client = require('../models/client');
 //Nodules
 const innerAuth = require('../nodule/inner-auth');
 const Reporting = require('../nodule/reporting');
-const Changer = require('../nodule/changer');
+const Configurate = require('../nodule/configurate');
+const Bunyan = require('../nodule/bunyan');
 
 module.exports = function(server) {
 
   // CREATE CLIENT
   server.post('/clients', innerAuth.adminAuth, (req, res, next) => {
 
+    Bunyan.begin('NEW '.green + 'client'.yellow + ' request from '.gray + req.connection.remoteAddress.cyan);
+
     if(!req.is('application/json')){
+      Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
       return next(
         new errors.InvalidContentError("Expects 'application/json'")
       );
     }
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
-
     let data = req.body || {};
 
-    console.log("                    \u2502 ".green + "Checking if the name already exists...".gray);
+    Bunyan.tell("Checking if the name already exists...".gray);
 
     Client.findOne({ name: data.name }, function(err, doc){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -42,7 +44,7 @@ module.exports = function(server) {
 
       if(doc == null){ // If the name doesn't exist
 
-        console.log("                    \u2502 ".green + "Name does not exist, continuing...".gray);
+        Bunyan.tell("Name does not exist, continuing...".gray);
 
         let cli = new Client(data);
 
@@ -51,48 +53,36 @@ module.exports = function(server) {
         cli.ipaddr = "None";
         cli.enabled = false;
 
-        console.log("                    \u2502 ".green + "Creating client hash... ".gray + "WARNING: ".red + "Hashing will probably be deprecated in future releases.".gray);
-
-        cli.hash = (function() {
-          let ns = "";
-          for(var i=0; i < cli.name.length; i++){
-            ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
-          }
-          return ns;
-        })();
-
-        console.log("                    \u2502 ".green + "Client hash set to ".gray + cli.hash.cyan + ".".gray);
-
-        console.log("                    \u2502 ".green + "Saving client entry...".gray);
+        Bunyan.tell("Saving client entry...".gray);
 
         cli.save(function(err){
 
           if(err){
-            console.log("                    \u2514 ".green + "ERROR".red, err.red);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(new errors.InternalError(err.message));
             next();
           }
 
-          console.log("                    \u2502 ".green + "Saved successfully, adding ".gray + "cid ".cyan + String(cli.cid).cyan + " to configuration file...".gray);
+          Bunyan.tell("Saved successfully, adding ".gray + "cid ".cyan + String(cli.cid).cyan + " to configuration file...".gray);
 
-          Changer.addConfigClients(cli.cid, function(err){
+          Configurate.addConfigClients(cli.cid, function(err){
 
             if(err){
-              console.log("                    \u2514 ".green + "ERROR".red, err.red);
+              Bunyan.conclude("ERROR: ".red + err.message.gray);
               return next(
                 new errors.InvalidContentError(err)
               );
             }
 
-            console.log("                    \u2502 ".green + "Successfully added client to configuration, initalizing timer...".gray);
+            Bunyan.tell("Successfully added client to configuration, initalizing timer...".gray);
 
             Reporting.addTimer(cli.cid, cli.interval);
 
-            console.log("                    \u2502 ".green + "Initialized client timer, sending response...".gray);
+            Bunyan.tell("Initialized client timer, sending response...".gray);
 
             res.send(201, cli);
 
-            console.log("                    \u2514 ".green + "SUCCESS\n".green);
+            Bunyan.succeed()
 
             next();
 
@@ -102,9 +92,10 @@ module.exports = function(server) {
 
       } else {
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Name exists in database.\n".gray);
-
         res.send(400);
+
+        Bunyan.fail("Name exists in database.".gray);
+
         next();
 
       }
@@ -117,21 +108,22 @@ module.exports = function(server) {
   server.post('/clients/inst/new', innerAuth.adminAuth, (req, res, next) => {
 
     /*if(!req.is('application/json')){
+      Bunyan.conclude("ERROR: Submitted data is not JSON.".red);
       return next(
         new errors.InvalidContentError("Expects 'application/json'")
       );
     }*/
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'client'.yellow + ' request from ' + req.connection.remoteAddress.cyan + " (INSTALLER)".magenta);
+    Bunyan.begin('NEW '.green + 'client'.yellow + ' request from '.gray + req.connection.remoteAddress.cyan + " (INSTALLER)".magenta);
 
     let data = JSON.parse(req.body) || {};
 
-    console.log("                    \u2502 ".green + "Checking if the name already exists...".gray);
+    Bunyan.tell("Checking if the name already exists...".gray);
 
     Client.findOne({ name: data.name }, function(err, doc){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -139,7 +131,7 @@ module.exports = function(server) {
 
       if(doc == null){ // If the name doesn't exist
 
-        console.log("                    \u2502 ".green + "Name does not exist, continuing...".gray);
+        Bunyan.tell("Name does not exist, continuing...".gray);
 
         let cli = new Client(data);
 
@@ -150,48 +142,36 @@ module.exports = function(server) {
         cli.missing = false;
         cli.enabled = false;
 
-        console.log("                    \u2502 ".green + "Creating client hash... ".gray + "WARNING: ".red + "Hashing will probably be deprecated in future releases.".gray);
-
-        cli.hash = (function() {
-          let ns = "";
-          for(var i=0; i < cli.name.length; i++){
-            ns += String.fromCharCode(cli.name.charCodeAt(i)*(i+1));
-          }
-          return ns;
-        })();
-
-        console.log("                    \u2502 ".green + "Client hash set to ".gray + cli.hash.cyan + ".".gray);
-
-        console.log("                    \u2502 ".green + "Saving client entry...".gray);
+        Bunyan.tell("Saving client entry...".gray);
 
         cli.save(function(err){
 
           if(err){
-            console.log("                    \u2514 ".green + "ERROR".red, err.red);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(new errors.InternalError(err.message));
             next();
           }
 
-          console.log("                    \u2502 ".green + "Saved successfully, adding ".gray + "cid ".cyan + String(cli.cid).cyan + " to configuration file...".gray);
+          Bunyan.tell("Saved successfully, adding ".gray + "cid ".cyan + String(cli.cid).cyan + " to configuration file...".gray);
 
-          Changer.addConfigClients(cli.cid, function(err){
+          Configurate.addConfigClients(cli.cid, function(err){
 
             if(err){
-              console.log("                    \u2514 ".green + "ERROR".red, err.red);
+              Bunyan.conclude("ERROR: ".red + err.message.gray);
               return next(
                 new errors.InvalidContentError(err)
               );
             }
 
-            console.log("                    \u2502 ".green + "Successfully added client to configuration, initalizing timer...".gray);
+            Bunyan.tell("Successfully added client to configuration, initalizing timer...".gray);
 
             Reporting.addTimer(cli.cid, cli.interval);
 
-            console.log("                    \u2502 ".green + "Initialized client timer, sending response...".gray);
+            Bunyan.tell("Initialized client timer, sending response...".gray);
 
             res.send(200);
 
-            console.log("                    \u2514 ".green + "SUCCESS\n".green);
+            Bunyan.succeed()
 
             next();
 
@@ -201,9 +181,10 @@ module.exports = function(server) {
 
       } else {
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Name exists in database.\n".gray);
-
         res.send(400);
+
+        Bunyan.fail("Name exists in database.".gray);
+
         next();
 
       }
@@ -215,14 +196,14 @@ module.exports = function(server) {
   // GET SINGLE CLIENT
   server.get('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan);
+    Bunyan.begin('GET '.green + 'client '.yellow + req.params.cid.cyan + ' request from '.gray + req.connection.remoteAddress.cyan);
 
-    console.log("                    \u2502 ".green + "Checking if the client exists...".gray);
+    Bunyan.tell("Checking if the client exists...".gray);
 
     Client.findOne({ cid: req.params.cid }, function(err, doc){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -232,17 +213,17 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+        Bunyan.fail("Client does not exist.".gray);
 
         next();
 
       } else {
 
-        console.log("                    \u2502 ".green + "Client exists, sending response...".gray);
+        Bunyan.tell("Client exists, sending response...".gray);
 
         res.send(200, doc);
 
-        console.log("                    \u2514 ".green + "SUCCESS\n".green);
+        Bunyan.succeed()
 
         next();
 
@@ -255,12 +236,12 @@ module.exports = function(server) {
   // LIST CLIENTS
   server.get('/clients', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'all clients'.yellow + ' request from ' + req.connection.remoteAddress.cyan);
+    Bunyan.begin('GET '.green + 'all clients'.yellow + ' request from '.gray + req.connection.remoteAddress.cyan);
 
     Client.apiQuery(req.params, function(err, docs){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -268,7 +249,7 @@ module.exports = function(server) {
 
       res.send(200, docs);
 
-      console.log("                    \u2514 ".green + "SUCCESS: ".green + String(docs.length).gray + " clients.".gray);
+      Bunyan.succeed(String(docs.length).gray + " clients.".gray);
 
       next();
 
@@ -280,7 +261,7 @@ module.exports = function(server) {
   server.put('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
 
     if(!req.is('application/json')){
-      console.error('[MM-DD-YY] hh:mm    '.timestamp + "Submitted data is not JSON.".red);
+      Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
       return next(
         new errors.InvalidContentError("Expects 'application/json'")
       );
@@ -288,14 +269,14 @@ module.exports = function(server) {
 
     let data = req.body || {};
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'UPDATE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan);
+    Bunyan.begin('UPDATE '.green + 'client '.yellow + req.params.cid.cyan + ' request from '.gray + req.connection.remoteAddress.cyan);
 
-    console.log("                    \u2502 ".green + "Checking if the client exists...".gray);
+    Bunyan.tell("Checking if the client exists...".gray);
 
     Client.findOneAndUpdate({ cid: req.params.cid }, { $set: data }, function(err, doc){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -305,17 +286,17 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+        Bunyan.fail("Client does not exist.".gray);
 
         next();
 
       } else {
 
-        console.log("                    \u2502 ".green + "Client exists, pushing data ".gray + JSON.stringify(data).gray);
+        Bunyan.tell("Client exists, pushing data ".gray + JSON.stringify(data).gray);
 
         res.send(200, doc);
 
-        console.log("                    \u2514 ".green + "SUCCESS\n".green);
+        Bunyan.succeed()
 
         next();
 
@@ -328,14 +309,14 @@ module.exports = function(server) {
   // DELETE CLIENT
   server.del('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.cid.cyan + ' request from ' + req.connection.remoteAddress.cyan);
+    Bunyan.begin('DELETE '.green + 'client '.yellow + req.params.cid.cyan + ' request from '.gray + req.connection.remoteAddress.cyan);
 
-    console.log("                    \u2502 ".green + "Checking if the client exists...".gray);
+    Bunyan.tell("Checking if the client exists...".gray);
 
     Client.findOne({ cid: req.params.cid }, function(err, clienttoremove){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -343,35 +324,35 @@ module.exports = function(server) {
 
       if(clienttoremove){ // if it exists
 
-        console.log("                    \u2502 ".green + "Client exists, deleting...".gray);
+        Bunyan.tell("Client exists, deleting...".gray);
 
         Client.remove({ cid: clienttoremove.cid }, function(err, docs){
 
           if(err){
-            console.log("                    \u2514 ".green + "ERROR".red, err.red);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(
               new errors.InvalidContentError(err)
             );
           }
 
-          console.log("                    \u2502 ".green + "Client successfully removed, removing from configuration...".gray);
+          Bunyan.tell("Client successfully removed, removing from configuration...".gray);
 
-          Changer.removeConfigClients(clienttoremove.cid, function(err){
+          Configurate.removeConfigClients(clienttoremove.cid, function(err){
 
             if(err){
-              console.log("                    \u2514 ".green + "ERROR".red, err.red);
+              Bunyan.conclude("ERROR: ".red + err.message.gray);
               return next(
                 new errors.InvalidContentError(err)
               );
             }
 
-            console.log("                    \u2502 ".green + "Client removed from configuration, removing timer entry...".gray);
+            Bunyan.tell("Client removed from configuration, removing timer entry...".gray);
 
             Reporting.removeTimer(req.params.cid);
 
             res.send(204);
 
-            console.log("                    \u2514 ".green + "SUCCESS\n".green);
+            Bunyan.succeed()
 
             next();
 
@@ -383,7 +364,7 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+        Bunyan.fail("Client does not exist.".gray);
 
         next();
 
@@ -396,14 +377,14 @@ module.exports = function(server) {
   // DELETE CLIENT FROM INSTALLER
   server.post('/clients/inst/:name', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'client '.yellow + req.params.name.cyan + ' request from ' + req.connection.remoteAddress.cyan + ' (INSTALLER)'.magenta);
+    Bunyan.begin('DELETE '.green + 'client '.yellow + req.params.name.cyan + ' request from '.gray + req.connection.remoteAddress.cyan + ' (INSTALLER)'.magenta);
 
-    console.log("                    \u2502 ".green + "Checking if the client exists...".gray);
+    Bunyan.tell("Checking if the client exists...".gray);
 
     Client.findOne({ name: req.params.name }, function(err, clienttoremove){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -411,35 +392,35 @@ module.exports = function(server) {
 
       if(clienttoremove){ // if it exists
 
-        console.log("                    \u2502 ".green + "Client exists, deleting...".gray);
+        Bunyan.tell("Client exists, deleting...".gray);
 
         Client.remove({ cid: clienttoremove.cid }, function(err, docs){
 
           if(err){
-            console.log("                    \u2514 ".green + "ERROR".red, err.red);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(
               new errors.InvalidContentError(err)
             );
           }
 
-          console.log("                    \u2502 ".green + "Client successfully removed, removing from configuration...".gray);
+          Bunyan.tell("Client successfully removed, removing from configuration...".gray);
 
-          Changer.removeConfigClients(clienttoremove.cid, function(err, doc){
+          Configurate.removeConfigClients(clienttoremove.cid, function(err, doc){
 
             if(err){
-              console.log("                    \u2514 ".green + "ERROR".red, err.red);
+              Bunyan.conclude("ERROR: ".red + err.message.gray);
               return next(
                 new errors.InvalidContentError(err)
               );
             }
 
-            console.log("                    \u2502 ".green + "Client removed from configuration, removing timer entry...".gray);
+            Bunyan.tell("Client removed from configuration, removing timer entry...".gray);
 
             Reporting.removeTimer(clienttoremove.cid);
 
             res.send(204);
 
-            console.log("                    \u2514 ".green + "SUCCESS\n".green);
+            Bunyan.succeed()
 
             next();
 
@@ -451,7 +432,7 @@ module.exports = function(server) {
 
         res.send(200); // This line needs to send 200 or the uninstaller can't continue. This allows for deleting clients from the console as well as from the uninstaller. This shouldn't cause a conflict with an active client becuase the fields auto-fill in the uninstaller.
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+        Bunyan.fail("Client does not exist.".gray);
 
         next();
 
@@ -462,18 +443,18 @@ module.exports = function(server) {
   });
 
   // CLIENT REPORT
-  server.put('/clients/report/:chash', innerAuth.adminAuth, (req, res, next) => {
+  server.put('/clients/report/:name', innerAuth.adminAuth, (req, res, next) => {
 
     let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'REPORT'.green + ' client '.yellow + req.params.chash + ' from ' + req.connection.remoteAddress.cyan);
+    Bunyan.begin('REPORT'.green + ' client '.yellow + req.params.name + ' from '.gray + req.connection.remoteAddress.cyan);
 
-    console.log("                    \u2502 ".green + "Checking if the client exists...".gray);
+    Bunyan.tell("Checking if the client exists...".gray);
 
-    Client.findOneAndUpdate({ hash: req.params.chash }, { datereported: date, ipaddr: req.body.ip, enabled: true }, function(err, doc){
+    Client.findOneAndUpdate({ name: req.params.name }, { datereported: date, ipaddr: req.body.ip, enabled: true }, function(err, doc){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -483,19 +464,19 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+        Bunyan.fail("Client does not exist.".gray);
 
         next();
 
       } else {
 
-        console.log("                    \u2502 ".green + "Client exists. Running tests...".gray);
+        Bunyan.tell("Client exists. Running tests...".gray);
 
         if(!doc.enabled){
 
           Reporting.addTimer(doc.cid, doc.interval);
 
-          console.log("                    \u2502 ".green + "Client was not previously enabled. Enabled and initialized the timer.".gray);
+          Bunyan.tell("Client was not previously enabled. Enabled and initialized the timer.".gray);
 
         }
 
@@ -503,13 +484,13 @@ module.exports = function(server) {
 
           Reporting.checkClient(doc.cid);
 
-          console.log("                    \u2502 ".green + "Client was previously missing, manually performed check.".gray);
+          Bunyan.tell("Client was previously missing, manually performed check.".gray);
 
         }
 
         res.send(200, doc);
 
-        console.log("                    \u2514 ".green + "SUCCESS\n".green);
+        Bunyan.succeed()
 
         next();
 
@@ -520,16 +501,17 @@ module.exports = function(server) {
   });
 
   // CLIENT RETRIEVE SETTINGS
-  server.get('/clients/report/:chash', innerAuth.adminAuth, (req, res, next) => {
+  // This is different from GET SINGLE CLIENT because it injects data that the client needs to perform non-standard operations.
+  server.get('/clients/report/:name', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'client '.yellow + req.params.chash + ' settings request from ' + req.connection.remoteAddress.cyan);
+    Bunyan.begin('SETTINGS '.green + 'request for '.gray + 'client '.yellow + req.params.name + ' from '.gray + req.connection.remoteAddress.cyan);
 
-    console.log("                    \u2502 ".green + "Checking if the client exists...".gray);
+    Bunyan.tell("Checking if the client exists...".gray);
 
-    Client.findOne({ hash: req.params.chash }, function(err, doc){
+    Client.findOne({ name: req.params.name }, function(err, doc){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -539,18 +521,18 @@ module.exports = function(server) {
 
         res.send(404);
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+        Bunyan.fail("Client does not exist.".gray);
 
         next();
 
       } else {
 
-        console.log("                    \u2502 ".green + "Client exists, getting latest version number...".gray);
+        Bunyan.tell("Client exists, getting latest version number...".gray);
 
-        Changer.getConfig(function(err, conf){
+        Configurate.getConfig(function(err, conf){
 
           if(err){
-            console.log("                    \u2514 ".green + "ERROR".red, err.red);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(
               new errors.InvalidContentError(err)
             );
@@ -558,11 +540,11 @@ module.exports = function(server) {
 
           doc.version = conf.clientversion;
 
-          console.log("                    \u2502 ".green + "Set latest version number to ".gray + String(doc.version).cyan);
+          Bunyan.tell("Set latest version number to ".gray + String(doc.version).cyan);
 
           res.send(200, doc);
 
-          console.log("                    \u2514 ".green + "SUCCESS\n".green);
+          Bunyan.succeed()
 
           next();
 
@@ -577,16 +559,16 @@ module.exports = function(server) {
   // GET CURRENT EXECUTABLE
   server.get('/clients/executable', innerAuth.adminAuth, (req, res, next) => {
 
-    console.log('[MM-DD-YY] hh:mm    '.timestamp + 'EXE '.green + 'request from ' + req.connection.remoteAddress.cyan);
+    Bunyan.begin('EXE '.green + 'request from '.gray + req.connection.remoteAddress.cyan);
 
-    console.log("                    \u2502 ".green + "Retriving file and writing to response...".gray);
+    Bunyan.tell("Retriving file and writing to response...".gray);
 
     res.setHeader('Content-disposition', 'attachment; filename=newver.exe');
 
-    Changer.getConfig(function(err, conf){
+    Configurate.getConfig(function(err, conf){
 
       if(err){
-        console.log("                    \u2514 ".green + "ERROR".red, err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -596,7 +578,7 @@ module.exports = function(server) {
 
       filestream.pipe(res);
 
-      console.log("                    \u2514 ".green + "SUCCESS\n".green);
+      Bunyan.succeed()
 
       next();
 

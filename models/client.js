@@ -17,10 +17,6 @@ const ClientSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    hash: {
-      type: String,
-      required: true,
-    },
     datereported: {
       type: String,
       required: false,

@@ -18,13 +18,14 @@ const Client = require('../models/client');
 const innerAuth = require('../nodule/inner-auth');
 const sysMail = require('../nodule/sys-mail');
 const Reporting = require('../nodule/reporting');
+const Bunyan = require('../nodule/bunyan');
 
 function removeConfigRecipients(rid, callback){
 
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.error("ERROR: ".red + err.red);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -33,7 +34,7 @@ function removeConfigRecipients(rid, callback){
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { recipients: rid } }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.error("ERROR: ".red + err.red);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -52,7 +53,7 @@ function addConfigRecipients(rid, callback){
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.error("ERROR: ".red + err.red);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -61,7 +62,7 @@ function addConfigRecipients(rid, callback){
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { recipients: rid } }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.error("ERROR: ".red + err.red);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -80,7 +81,7 @@ function getConfig(callback){
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.error("ERROR: ".red + err.red);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -89,7 +90,7 @@ function getConfig(callback){
     Config.findOne({ cid: mc.currentconfig }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.error("ERROR: ".red + err.red);
         return next(
           new errors.InvalidContentError(err)
         );

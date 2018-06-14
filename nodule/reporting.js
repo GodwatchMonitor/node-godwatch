@@ -1,6 +1,7 @@
 const Client = require('../models/client');
 const errors = require('restify-errors');
 const SysMail = require('../nodule/sys-mail');
+const Bunyan = require('../nodule/bunyan');
 
 var timers = {};
 
@@ -42,7 +43,7 @@ function checkClient(cid){
   Client.findOne({ cid: cid }, function(err, client){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.error("ERROR".red, err);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -50,7 +51,7 @@ function checkClient(cid){
 
     if(!client){
 
-      console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+      Bunyan.conclude("FAILURE: ".red + "Client does not exist.".gray);
       return new errors.ResourceNotFoundError(
           'The resource you requested could not be found.'
         )
@@ -63,53 +64,53 @@ function checkClient(cid){
 
       if(client.enabled){
 
-        console.log('[MM-DD-YY] hh:mm    '.timestamp + "CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
+        Bunyan.begin("CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
 
         let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
         let datereported = client.datereported;
 
         let current_interval = timers[client.cid]._idleTimeout;
 
-        console.log("                    \u2502 ".green + "Comparing current time with last time reported...".gray);
+        Bunyan.tell("Comparing current time with last time reported...".gray);
 
         let dif = date_difference(date, datereported)*60*1000;
 
-        console.log("                    \u2502 ".green + "Client has not reported in ".gray + String(dif).cyan + " milliseconds.".gray);
+        Bunyan.tell("Client has not reported in ".gray + String(dif).cyan + " milliseconds.".gray);
 
         if(dif > current_interval*client.tolerance){
 
-          console.log("                    \u2502 ".green + "Client has not reported in the specified time frame.".gray);
+          Bunyan.tell("Client has not reported in the specified time frame.".gray);
 
           if(client.timesmissing >= 0){
 
-            console.log("                    \u2502 ".green + "ALERT: Client is missing. It has either lost network connectivity, lost power, or had the Godwatch Client exited.".red);
+            Bunyan.tell("ALERT: Client is missing. It has either lost network connectivity, lost power, or had the Godwatch Client exited.".red);
 
             if(!client.missing){ //Only send alert the first time
 
-              console.log("                    \u2502 ".green + "Sending alert...".gray);
+              Bunyan.tell("Sending alert...".gray);
 
               SysMail.sendAlerts("Godwatch Alert", client.name + " has lost connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
               ndata.missing = true;
 
             } else {
 
-              console.log("                    \u2502 ".green + "Client was already flagged as missing. No alert will be sent.".gray);
+              Bunyan.tell("Client was already flagged as missing. No alert will be sent.".gray);
 
             }
 
           } else {
 
-            console.log("                    \u2502 ".green + "Client is currently in grace period due to a server restart, overlooking.".gray);
+            Bunyan.tell("Client is currently in grace period due to a server restart, overlooking.".gray);
 
           }
 
         } else {
 
-          console.log("                    \u2502 ".green + "Client is within specified interval.".gray);
+          Bunyan.tell("Client is within specified interval.".gray);
 
           if(client.missing){ //Send reconnection alert
 
-            console.log("                    \u2502 ".green + "Client was previously missing, sending reconnection alert...".gray);
+            Bunyan.tell("Client was previously missing, sending reconnection alert...".gray);
 
             SysMail.sendAlerts("Godwatch Alert", client.name + " has regained connectivity at " + '[MM-DD-YY] hh:mm'.timestamp);
 
@@ -128,14 +129,14 @@ function checkClient(cid){
         Client.findOneAndUpdate({ cid: cid }, { $set: ndata }, function(err, clinew){
 
           if(err){
-            console.log("                    \u2514 ".green + "ERROR".red, err.red);
+            Bunyan.conclude("ERROR".red, err.red);
             return next(
               new errors.InvalidContentError(err)
             );
           }
 
           if(!clinew){
-            console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+            Bunyan.conclude("FAILURE: ".red + "Client does not exist.".gray);
             return new errors.ResourceNotFoundError(
                 'The resource you requested could not be found.'
               )
@@ -143,17 +144,17 @@ function checkClient(cid){
 
         });
 
-        console.log("                    \u2502 ".green + "Resetting timer...".gray);
+        Bunyan.tell("Resetting timer...".gray);
 
         clearTimeout(timers[String(client.cid)]);
 
         timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
 
-        console.log("                    \u2514 ".green + "SUCCESS\n".green);
+        Bunyan.conclude("SUCCESS".green);
 
       } else {
 
-        console.log("                    \u2514 ".green + "FAILURE: ".red + "Client is not enabled.\n".gray);
+        Bunyan.conclude("FAILURE: ".red + "Client is not enabled.".gray);
 
       }
 
@@ -161,6 +162,12 @@ function checkClient(cid){
 
   });
 
+}
+
+function specialSuccess(i, t){
+  if(i >= t){
+    Bunyan.conclude("SUCCESS: ".green + String(docs.length).gray + " timers initialized.".gray);
+  }
 }
 
 function initialize(){
@@ -195,7 +202,7 @@ function initialize(){
 
           if(!clinew){
 
-            console.log("                    \u2514 ".green + "FAILURE: ".red + "Client does not exist.\n".gray);
+            Bunyan.conclude("FAILURE: ".red + "Client does not exist.".gray);
             return new errors.ResourceNotFoundError(
                 'The resource you requested could not be found.'
               )
@@ -204,13 +211,11 @@ function initialize(){
 
             timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
 
-            console.log("                    \u2502 ".green + "Initialized ".gray + client.name.cyan + " at interval ".gray + String(client.interval).cyan);
+            Bunyan.tell("Initialized ".gray + client.name.cyan + " at interval ".gray + String(client.interval).cyan);
 
           }
 
-          if(i == docs.length){
-            console.log("                    \u2514 ".green + "SUCCESS: ".green + String(docs.length).gray + " timers initialized.\n".gray);
-          }
+          specialSuccess(i, docs.length);
 
         });
 

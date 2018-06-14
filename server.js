@@ -12,6 +12,8 @@ const route66 = require('./nodule/route-66');
 const innerAuth = require('./nodule/inner-auth');
 const Reporting = require('./nodule/reporting');
 const SysMail = require('./nodule/sys-mail');
+const Configurate = require('./nodule/configurate');
+const Bunyan = require('./nodule/bunyan');
 
 const colors = require('colors');
 const timestamp = require('console-timestamp');
@@ -52,19 +54,19 @@ figlet.text('node-godwatch', {
     verticalLayout: 'default'
 }, function(err, data) {
     if (err) {
-        console.log('Something went wrong...'.red);
+        Bunyan.log('Something went wrong...'.red);
         console.dir(err);
         return;
     }
-    console.log(data.green);
-    console.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray);
+    Bunyan.log(data.green);
+    Bunyan.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray);
 
 });
 
 // Start Server, Connect to DB and Require Routes
 server.listen(config.port, () => {
 
-  console.log('\033c');
+  Bunyan.log('\033c');
 
   //connect to mongodb
   mongoose.Promise = global.Promise;
@@ -74,7 +76,7 @@ server.listen(config.port, () => {
   const db = mongoose.connection;
 
   db.on('error', (err) => {
-    console.error(err);
+    Bunyan.error(err);
     process.exit(1);
   });
 
@@ -82,11 +84,11 @@ server.listen(config.port, () => {
 
     route66.initializeRoutes(server);
 
-    innerAuth.checkSetup(function(err){
+    Configurate.checkSetup(function(err){
 
       if(!err){
 
-        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Server is listening on port ' + config.port + '\n');
+        Bunyan.notify('Server is listening on port ' + config.port);
 
         Reporting.initialize();
 
@@ -106,7 +108,7 @@ server.listen(config.port, () => {
 
           db.once('open', () => {
             route66.initializeRoutes(secureserver);
-            console.log('[MM-DD-YY] hh:mm    '.timestamp + 'Secure Server is listening on port ' + config.secureport);
+            Bunyan.notify('Secure Server is listening on port ' + config.secureport);
           });
 
         });*/
