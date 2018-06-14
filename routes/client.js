@@ -24,9 +24,7 @@ module.exports = function(server) {
 
     if(!req.is('application/json')){
       Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
-      return next(
-        new errors.InvalidContentError("Expects 'application/json'")
-      );
+      return next(new errors.InvalidContentError("Expects 'application/json'"));
     }
 
     let data = req.body || {};
@@ -37,9 +35,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(doc == null){ // If the name doesn't exist
@@ -60,7 +56,6 @@ module.exports = function(server) {
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(new errors.InternalError(err.message));
-            next();
           }
 
           Bunyan.tell("Saved successfully, adding ".gray + "cid ".cyan + String(cli.cid).cyan + " to configuration file...".gray);
@@ -69,9 +64,7 @@ module.exports = function(server) {
 
             if(err){
               Bunyan.conclude("ERROR: ".red + err.message.gray);
-              return next(
-                new errors.InvalidContentError(err)
-              );
+              return next(new errors.InternalError(err.message));
             }
 
             Bunyan.tell("Successfully added client to configuration, initalizing timer...".gray);
@@ -124,9 +117,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(doc == null){ // If the name doesn't exist
@@ -149,7 +140,6 @@ module.exports = function(server) {
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(new errors.InternalError(err.message));
-            next();
           }
 
           Bunyan.tell("Saved successfully, adding ".gray + "cid ".cyan + String(cli.cid).cyan + " to configuration file...".gray);
@@ -158,9 +148,7 @@ module.exports = function(server) {
 
             if(err){
               Bunyan.conclude("ERROR: ".red + err.message.gray);
-              return next(
-                new errors.InvalidContentError(err)
-              );
+              return next(new errors.InternalError(err.message));
             }
 
             Bunyan.tell("Successfully added client to configuration, initalizing timer...".gray);
@@ -204,9 +192,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(!doc){
@@ -242,9 +228,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       res.send(200, docs);
@@ -262,9 +246,7 @@ module.exports = function(server) {
 
     if(!req.is('application/json')){
       Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
-      return next(
-        new errors.InvalidContentError("Expects 'application/json'")
-      );
+      return next(new errors.InvalidContentError("Expects 'application/json'"));
     }
 
     let data = req.body || {};
@@ -277,9 +259,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(!doc){
@@ -317,9 +297,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(clienttoremove){ // if it exists
@@ -330,9 +308,7 @@ module.exports = function(server) {
 
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
-            return next(
-              new errors.InvalidContentError(err)
-            );
+            return next(new errors.InternalError(err.message));
           }
 
           Bunyan.tell("Client successfully removed, removing from configuration...".gray);
@@ -341,9 +317,7 @@ module.exports = function(server) {
 
             if(err){
               Bunyan.conclude("ERROR: ".red + err.message.gray);
-              return next(
-                new errors.InvalidContentError(err)
-              );
+              return next(new errors.InternalError(err.message));
             }
 
             Bunyan.tell("Client removed from configuration, removing timer entry...".gray);
@@ -385,9 +359,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(clienttoremove){ // if it exists
@@ -398,9 +370,7 @@ module.exports = function(server) {
 
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
-            return next(
-              new errors.InvalidContentError(err)
-            );
+            return next(new errors.InternalError(err.message));
           }
 
           Bunyan.tell("Client successfully removed, removing from configuration...".gray);
@@ -409,9 +379,7 @@ module.exports = function(server) {
 
             if(err){
               Bunyan.conclude("ERROR: ".red + err.message.gray);
-              return next(
-                new errors.InvalidContentError(err)
-              );
+              return next(new errors.InternalError(err.message));
             }
 
             Bunyan.tell("Client removed from configuration, removing timer entry...".gray);
@@ -455,9 +423,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(!doc){
@@ -512,9 +478,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(!doc){
@@ -533,9 +497,7 @@ module.exports = function(server) {
 
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
-            return next(
-              new errors.InvalidContentError(err)
-            );
+            return next(new errors.InternalError(err.message));
           }
 
           doc.version = conf.clientversion;
@@ -569,9 +531,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       var filestream = fs.createReadStream('./static/client'+String(conf.currentversion)+'.exe');

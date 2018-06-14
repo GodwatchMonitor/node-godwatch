@@ -18,7 +18,10 @@ module.exports = function(server) {
   // CREATE RECIPIENT
   server.post('/recipients', innerAuth.adminAuth, (req, res, next) => {
 
+    Bunyan.begin('NEW '.green + 'recipient'.yellow + ' request from '.gray + req.connection.remoteAddress.cyan);
+
     if(!req.is('application/json')){
+      Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
       return next(
         new errors.InvalidContentError("Expects 'application/json'")
       );
@@ -26,26 +29,28 @@ module.exports = function(server) {
 
     let data = req.body || {};
 
+    Bunyan.tell('Assigning data...'.gray);
+
     let recip = new Recipient(data);
 
     recip.save(function(err){
 
       if(err){
-        console.error("ERROR".red, err);
-        return next(new errors.InternalError(err.message));
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
+        return next(
+          new errors.InternalError(err)
+        );
         next();
       }
 
       Configurate.addConfigRecipients(recip.rid, function(err){
 
         if(err){
-          console.error("ERROR".red, err);
+          Bunyan.conclude("ERROR: ".red + err.message.gray);
           return next(
-            new errors.InvalidContentError(err)
+            new errors.InternalError(err)
           );
         }
-
-        console.log('[MM-DD-YY] hh:mm    '.timestamp + 'NEW '.green + 'recipient'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
 
         res.send(201, recip);
         next();
@@ -62,7 +67,7 @@ module.exports = function(server) {
     Recipient.findOne({ rid: req.params.rid }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -92,7 +97,7 @@ module.exports = function(server) {
     Recipient.apiQuery(req.params, function(err, docs){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -122,7 +127,7 @@ module.exports = function(server) {
     Recipient.findOneAndUpdate({ rid: req.params.rid }, { $set: data }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -152,7 +157,7 @@ module.exports = function(server) {
     Recipient.findOne({ rid: req.params.rid }, function(err, recipienttoremove){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -163,7 +168,7 @@ module.exports = function(server) {
         Recipient.remove({ rid: req.params.rid }, function(err, docs){
 
           if(err){
-            console.error("ERROR".red, err);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(
               new errors.InvalidContentError(err)
             );
