@@ -12,34 +12,7 @@ const MainConf = require('../models/mainconf');
 //Nodules
 const innerAuth = require('../nodule/inner-auth');
 const Bunyan = require('../nodule/bunyan');
-
-function getConfig(callback){
-
-  MainConf.findOne({ blip: 1 }, function(err, mc){
-
-    if(err){
-      Bunyan.error("ERROR: ".red + err.message.gray);
-      return next(
-        new errors.InvalidContentError(err)
-      );
-    }
-
-    Config.findOne({ cid: mc.currentconfig }, function(err, doc){
-
-      if(err){
-        Bunyan.error("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
-      }
-
-      callback(err, doc);
-
-    });
-
-  });
-
-}
+const Configurate = require('../nodule/configurate');
 
 module.exports = function(server) {
 
@@ -57,7 +30,7 @@ module.exports = function(server) {
     Config.apiQuery(req.params, function(err, docs){
 
       if(err){
-        Bunyan.error(err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -65,7 +38,7 @@ module.exports = function(server) {
 
       res.send(200, docs);
 
-      Bunyan.conclude('SUCCESS: '.green + String(docs.length).gray + ' configurations'.gray);
+      Bunyan.succeed(String(docs.length).gray + ' configurations'.gray);
 
       next();
 
@@ -83,7 +56,7 @@ module.exports = function(server) {
     Config.findOne({ cid: req.params.cid }, function(err, doc) {
 
       if(err){
-        Bunyan.error("ERROR: ".red + err.message.gray);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -130,7 +103,7 @@ module.exports = function(server) {
     Config.findOneAndUpdate({ cid: req.params.cid }, { $set: data }, function(err, doc){
 
       if(err){
-        Bunyan.conclude("ERROR: ".red + err.red);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -166,7 +139,7 @@ module.exports = function(server) {
     Config.findOne({ cid: req.params.cid }, function(err, configtoremove){
 
       if(err){
-        Bunyan.error("ERROR: ".red + err.message.gray);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -177,7 +150,7 @@ module.exports = function(server) {
         Config.remove({ cid: req.params.cid }, function(err, doc) {
 
           if(err){
-            Bunyan.error("ERROR: ".red + err.message.gray);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(
               new errors.InvalidContentError(err)
             );
@@ -220,7 +193,7 @@ module.exports = function(server) {
     Config.remove({}, function(err) {
 
       if(err){
-        Bunyan.error("ERROR: ".red + err.message.gray);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -231,7 +204,7 @@ module.exports = function(server) {
         MainConf.remove({}, function(err) {
 
           if(err){
-            Bunyan.error("ERROR: ".red + err.message.gray);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(
               new errors.InvalidContentError(err)
             );

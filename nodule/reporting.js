@@ -166,18 +166,18 @@ function checkClient(cid){
 
 function specialSuccess(i, t){
   if(i >= t){
-    Bunyan.conclude("SUCCESS: ".green + String(docs.length).gray + " timers initialized.".gray);
+    Bunyan.conclude("SUCCESS: ".green + String(t).gray + " timers initialized.".gray);
   }
 }
 
 function initialize(){
 
-  console.log('[MM-DD-YY] hh:mm    '.timestamp + "INITIALIZE ".green + "all timers...".yellow);
+  Bunyan.begin("INITIALIZE ".green + "all timers...".yellow);
 
   Client.apiQuery({}, function(err, docs){
 
     if(err){
-      console.log("ERROR".red, err);
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -194,7 +194,7 @@ function initialize(){
         Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
 
           if(err){
-            console.error("ERROR".red, err);
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
             return next(
               new errors.InvalidContentError(err)
             );
@@ -202,7 +202,7 @@ function initialize(){
 
           if(!clinew){
 
-            Bunyan.conclude("FAILURE: ".red + "Client does not exist.".gray);
+            Bunyan.fail("Client does not exist.".gray);
             return new errors.ResourceNotFoundError(
                 'The resource you requested could not be found.'
               )
@@ -222,6 +222,10 @@ function initialize(){
       }
 
     });
+
+    if(docs.length <= 0){
+      specialSuccess(0, 0);
+    }
 
   });
 

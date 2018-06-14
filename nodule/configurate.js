@@ -17,7 +17,7 @@ function removeConfigRecipients(rid, callback){
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -26,7 +26,7 @@ function removeConfigRecipients(rid, callback){
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { recipients: rid } }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -45,7 +45,7 @@ function addConfigRecipients(rid, callback){
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -54,7 +54,7 @@ function addConfigRecipients(rid, callback){
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { recipients: rid } }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -73,7 +73,7 @@ function removeConfigClients(cid, callback){
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -82,7 +82,7 @@ function removeConfigClients(cid, callback){
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: cid } }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -101,7 +101,7 @@ function addConfigClients(cid, callback){
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -110,7 +110,7 @@ function addConfigClients(cid, callback){
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cid } }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -129,7 +129,7 @@ function getConfig(callback){
   MainConf.findOne({ blip: 1 }, function(err, mc){
 
     if(err){
-      console.error("ERROR".red, err);
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
       return next(
         new errors.InvalidContentError(err)
       );
@@ -138,7 +138,7 @@ function getConfig(callback){
     Config.findOne({ cid: mc.currentconfig }, function(err, doc){
 
       if(err){
-        console.error("ERROR".red, err);
+        Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -264,7 +264,7 @@ SOFTWARE.
       newConf.save(function(err){
 
         if(err){
-          console.error(err);
+          Bunyan.conclude("ERROR: ".red + err.message.gray);
           return next(new errors.InternalError(err.message.red));
           next();
         }

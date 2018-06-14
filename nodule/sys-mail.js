@@ -22,7 +22,7 @@ function sendAlerts(subject, mess){
     Recipient.apiQuery({}, function(err, docs){
 
       if(err){
-        Bunyan.error("ERROR: ".red + err.red);
+        Bunyan.conclude("ERROR: ".red + err.red);
         return next(
           new errors.InvalidContentError(err)
         );
@@ -58,7 +58,7 @@ function sendAlerts(subject, mess){
           transporter.sendMail(mailOptions, function(err, info){
 
             if(err){
-              return Bunyan.log("ERROR: ".red + err.red);
+              return Bunyan.conclude("ERROR: ".red + err.red);
             }
 
           });
