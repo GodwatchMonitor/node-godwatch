@@ -33,6 +33,7 @@
     "restify": "^7.2.0",
     "restify-cookies": "^0.2.5",
     "restify-plugins": "^1.6.0",
-    "signale": "^1.1.0"
+    "signale": "^1.1.0",
+    "strip-ansi": "^4.0.0"
   }
 }

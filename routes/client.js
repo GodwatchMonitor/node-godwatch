@@ -20,7 +20,7 @@ module.exports = function(server) {
   // CREATE CLIENT
   server.post('/clients', innerAuth.adminAuth, (req, res, next) => {
 
-    Bunyan.begin('NEW '.green + 'client'.yellow + ' request from '.gray + req.connection.remoteAddress.cyan);
+    Bunyan.begin('NEW '.green + 'client '.yellow + 'request from '.gray + req.connection.remoteAddress.cyan);
 
     if(!req.is('application/json')){
       Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
@@ -75,7 +75,7 @@ module.exports = function(server) {
 
             res.send(201, cli);
 
-            Bunyan.succeed()
+            Bunyan.succeed("Name: ".gray + cli.name.cyan + " | Interval: ".gray + String(cli.interval).cyan);
 
             next();
 
@@ -100,14 +100,12 @@ module.exports = function(server) {
   // CREATE CLIENT FROM INSTALLER
   server.post('/clients/inst/new', innerAuth.adminAuth, (req, res, next) => {
 
-    /*if(!req.is('application/json')){
-      Bunyan.conclude("ERROR: Submitted data is not JSON.".red);
-      return next(
-        new errors.InvalidContentError("Expects 'application/json'")
-      );
-    }*/
+    Bunyan.begin('NEW '.green + 'client '.yellow + 'request from '.gray + req.connection.remoteAddress.cyan + " (INSTALLER)".magenta);
 
-    Bunyan.begin('NEW '.green + 'client'.yellow + ' request from '.gray + req.connection.remoteAddress.cyan + " (INSTALLER)".magenta);
+    /*if(!req.is('application/json')){
+      Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
+      return next(new errors.InvalidContentError("Expects 'application/json'"));
+    }*/
 
     let data = JSON.parse(req.body) || {};
 
@@ -159,7 +157,7 @@ module.exports = function(server) {
 
             res.send(200);
 
-            Bunyan.succeed()
+            Bunyan.succeed("Name: ".gray + cli.name.cyan + " | Interval: ".gray + String(cli.interval).cyan);
 
             next();
 
@@ -244,14 +242,14 @@ module.exports = function(server) {
   // UPDATE CLIENT
   server.put('/clients/:cid', innerAuth.adminAuth, (req, res, next) => {
 
+    Bunyan.begin('UPDATE '.green + 'client '.yellow + req.params.cid.cyan + ' request from '.gray + req.connection.remoteAddress.cyan);
+
     if(!req.is('application/json')){
       Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
       return next(new errors.InvalidContentError("Expects 'application/json'"));
     }
 
     let data = req.body || {};
-
-    Bunyan.begin('UPDATE '.green + 'client '.yellow + req.params.cid.cyan + ' request from '.gray + req.connection.remoteAddress.cyan);
 
     Bunyan.tell("Checking if the client exists...".gray);
 
@@ -413,9 +411,9 @@ module.exports = function(server) {
   // CLIENT REPORT
   server.put('/clients/report/:name', innerAuth.adminAuth, (req, res, next) => {
 
-    let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
+    Bunyan.begin('REPORT'.green + ' client '.yellow + req.params.name.cyan + ' from '.gray + req.connection.remoteAddress.cyan);
 
-    Bunyan.begin('REPORT'.green + ' client '.yellow + req.params.name + ' from '.gray + req.connection.remoteAddress.cyan);
+    let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
 
     Bunyan.tell("Checking if the client exists...".gray);
 
@@ -470,7 +468,7 @@ module.exports = function(server) {
   // This is different from GET SINGLE CLIENT because it injects data that the client needs to perform non-standard operations.
   server.get('/clients/report/:name', innerAuth.adminAuth, (req, res, next) => {
 
-    Bunyan.begin('SETTINGS '.green + 'request for '.gray + 'client '.yellow + req.params.name + ' from '.gray + req.connection.remoteAddress.cyan);
+    Bunyan.begin('SETTINGS '.green + 'request for '.gray + 'client '.yellow + req.params.name.cyan + ' from '.gray + req.connection.remoteAddress.cyan);
 
     Bunyan.tell("Checking if the client exists...".gray);
 

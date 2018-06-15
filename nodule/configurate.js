@@ -18,18 +18,14 @@ function removeConfigRecipients(rid, callback){
 
     if(err){
       Bunyan.conclude("ERROR: ".red + err.message.gray);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+      return next(new errors.InternalError(err.message.red));
     }
 
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { recipients: rid } }, function(err, doc){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message.red));
       }
 
       callback(err);
@@ -46,18 +42,14 @@ function addConfigRecipients(rid, callback){
 
     if(err){
       Bunyan.conclude("ERROR: ".red + err.message.gray);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+      return next(new errors.InternalError(err.message.red));
     }
 
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { recipients: rid } }, function(err, doc){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message.red));
       }
 
       callback(err);
@@ -74,18 +66,14 @@ function removeConfigClients(cid, callback){
 
     if(err){
       Bunyan.conclude("ERROR: ".red + err.message.gray);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+      return next(new errors.InternalError(err.message.red));
     }
 
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $pull: { clients: cid } }, function(err, doc){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message.red));
       }
 
       callback(err);
@@ -102,18 +90,14 @@ function addConfigClients(cid, callback){
 
     if(err){
       Bunyan.conclude("ERROR: ".red + err.message.gray);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+      return next(new errors.InternalError(err.message.red));
     }
 
     Config.findOneAndUpdate({ cid: mc.currentconfig }, { $push: { clients: cid } }, function(err, doc){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message.red));
       }
 
       callback(err);
@@ -130,18 +114,14 @@ function getConfig(callback){
 
     if(err){
       Bunyan.conclude("ERROR: ".red + err.message.gray);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+      return next(new errors.InternalError(err.message.red));
     }
 
     Config.findOne({ cid: mc.currentconfig }, function(err, doc){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message.red));
       }
 
       callback(err, doc);
@@ -156,14 +136,12 @@ function checkSetup(callback){
 
   MainConf.findOne({ blip: 1 }, function(err, doc) {
     if(err){
-      Bunyan.error(err);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
+      return next(new errors.InternalError(err.message.red));
     }
 
-    Bunyan.log('node-godwatch by Samusoidal');
-    Bunyan.log('https://www.github.com/samusoidal/node-godwatch/');
+    Bunyan.log('node-godwatch by Samusoidal', 10);
+    Bunyan.log('https://www.github.com/samusoidal/node-godwatch/', 10);
     Bunyan.log(`Provided to you with an MIT License
 
 Copyright (c) 2018 Samusoidal
@@ -185,19 +163,19 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-`);
+`, 10);
 
-    Bunyan.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray);
+    Bunyan.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray, 10);
 
     if(doc == null){ //does not exist
 
-      Bunyan.log('No configuration found, running config...\n'.yellow);
+      Bunyan.log('No configuration found, running config...\n'.yellow, 10);
       var userName = prompt.question('----------    '.gray + 'Username: ');
       var passWord = prompt.question('----------    '.gray + 'Password: ', { hideEchoBack: true });
       var passWord2 = prompt.question('----------    '.gray + 'Confirm Password: ', { hideEchoBack: true });
 
       while(passWord != passWord2){
-        Bunyan.log('----------    '.gray + 'Passwords do not match, try again'.red);
+        Bunyan.log('----------    '.gray + 'Passwords do not match, try again'.red, 10);
         var passWord = prompt.question('----------    '.gray + 'Password: ', { hideEchoBack: true });
         var passWord2 = prompt.question('----------    '.gray + 'Confirm Password: ', { hideEchoBack: true });
       }
@@ -211,7 +189,7 @@ SOFTWARE.
         }
       );
 
-      Bunyan.log('\nRunning default email config...\n'.yellow);
+      Bunyan.log('\nRunning default email config...\n'.yellow, 10);
 
       var inMailhost = "";
       var inMailport = "";
@@ -237,7 +215,7 @@ SOFTWARE.
 
       var inMailRejectUnauthorized = "";
 
-      Bunyan.log('----------    Disable the following to ignore certificate errors when sending notifications'.gray);
+      Bunyan.log('----------    Disable the following to ignore certificate errors when sending notifications'.gray, 10);
 
       while(typeof inMailRejectUnauthorized != typeof boolval){
         inMailRejectUnauthorized = prompt.question('----------    '.gray + 'MailRejectUnauthorized (y/n): ');
@@ -266,7 +244,6 @@ SOFTWARE.
         if(err){
           Bunyan.conclude("ERROR: ".red + err.message.gray);
           return next(new errors.InternalError(err.message.red));
-          next();
         }
 
         newMConf.currentconfig = newConf.cid;

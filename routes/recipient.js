@@ -22,14 +22,12 @@ module.exports = function(server) {
 
     if(!req.is('application/json')){
       Bunyan.conclude("ERROR: ".red + "Submitted data is not JSON.".gray);
-      return next(
-        new errors.InvalidContentError("Expects 'application/json'")
-      );
+      return next(new errors.InvalidContentError("Expects 'application/json'"));
     }
 
     let data = req.body || {};
 
-    Bunyan.tell('Assigning data...'.gray);
+    Bunyan.tell('Assigning data and saving entry...'.gray);
 
     let recip = new Recipient(data);
 
@@ -37,22 +35,22 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InternalError(err)
-        );
-        next();
+        return next(new errors.InternalError(err.message));
       }
+
+      Bunyan.tell("Save recipient successfull, adding the rid to the configuration...".gray);
 
       Configurate.addConfigRecipients(recip.rid, function(err){
 
         if(err){
           Bunyan.conclude("ERROR: ".red + err.message.gray);
-          return next(
-            new errors.InternalError(err)
-          );
+          return next(new errors.InternalError(err.message));
         }
 
         res.send(201, recip);
+
+        Bunyan.succeed("Name: ".gray + recip.name.cyan + " | Address: ".gray + recip.address.cyan);
+
         next();
 
       });
@@ -68,9 +66,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(!doc){
@@ -98,9 +94,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       console.log('[MM-DD-YY] hh:mm    '.timestamp + 'GET '.green + 'all recipients'.yellow + ' request from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
@@ -115,11 +109,9 @@ module.exports = function(server) {
   // UPDATE RECIPIENT
   server.put('/recipients/:rid', innerAuth.adminAuth, (req, res, next) => {
 
-    if(!req.is('application/json')){
-      console.error('[MM-DD-YY] hh:mm    '.timestamp + "Submitted data is not JSON.".red);
-      return next(
-        new errors.InvalidContentError("Expects 'application/json'")
-      );
+    if(err){
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
+      return next(new errors.InternalError(err.message));
     }
 
     let data = req.body || {};
@@ -158,9 +150,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err.message));
       }
 
       if(recipienttoremove){ // if it does exist
@@ -169,9 +159,7 @@ module.exports = function(server) {
 
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
-            return next(
-              new errors.InvalidContentError(err)
-            );
+            return next(new errors.InternalError(err.message));
           }
 
           Configurate.removeConfigRecipients(req.params.rid, function(err){

@@ -48,25 +48,27 @@ secureserver.use(restifyPlugins.queryParser({ mapParams: true }));
 secureserver.use(restifyPlugins.fullResponse());
 secureserver.use(restifyPlugins.authorizationParser());
 
+Bunyan.init();
+
 figlet.text('node-godwatch', {
     font: 'Doom',
     horizontalLayout: 'default',
     verticalLayout: 'default'
 }, function(err, data) {
     if (err) {
-        Bunyan.log('Something went wrong...'.red);
+        Bunyan.log('Something went wrong...'.red, 0);
         console.dir(err);
         return;
     }
-    Bunyan.log(data.green);
-    Bunyan.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray);
+    Bunyan.log(data.green, 10);
+    Bunyan.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray, 10);
 
 });
 
 // Start Server, Connect to DB and Require Routes
 server.listen(config.port, () => {
 
-  Bunyan.log('\033c');
+  Bunyan.log('\033c', 10);
 
   //connect to mongodb
   mongoose.Promise = global.Promise;
@@ -88,7 +90,7 @@ server.listen(config.port, () => {
 
       if(!err){
 
-        Bunyan.notify('Server is listening on port ' + config.port);
+        Bunyan.notify('Server is listening on port ' + config.port, 0);
 
         Reporting.initialize();
 
