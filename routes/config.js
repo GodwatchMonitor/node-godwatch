@@ -31,9 +31,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err));
       }
 
       res.send(200, docs);
@@ -57,9 +55,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err));
       }
 
       if(!doc){
@@ -104,9 +100,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err));
       }
 
       if(!doc){
@@ -140,9 +134,7 @@ module.exports = function(server) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err));
       }
 
       if(configtoremove){ // if it does exist
@@ -151,9 +143,7 @@ module.exports = function(server) {
 
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
-            return next(
-              new errors.InvalidContentError(err)
-            );
+            return next(new errors.InternalError(err));
           }
 
           if(!doc){
@@ -188,15 +178,13 @@ module.exports = function(server) {
   */
 
   // DELETE MAIN CONFIG
-  server.del('/admin/config/main', (req, res, next) => {
+  server.del('/admin/config/main', innerAuth.adminAuth, (req, res, next) => {
 
     Config.remove({}, function(err) {
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(
-          new errors.InvalidContentError(err)
-        );
+        return next(new errors.InternalError(err));
       }
 
       Config.resetCount(function(err, nextCount){
@@ -205,12 +193,10 @@ module.exports = function(server) {
 
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);
-            return next(
-              new errors.InvalidContentError(err)
-            );
+            return next(new errors.InternalError(err));
           }
 
-          console.log('[MM-DD-YY] hh:mm    '.timestamp + 'DELETE '.green + 'EVERYTHING'.red + ' from ' + req.connection.remoteAddress.cyan + ' successful.'.green);
+          Bunyan.notify('DELETE '.green + 'EVERYTHING'.red + ' from '.gray + req.connection.remoteAddress.cyan + ' successful.'.green + " Restart server application to apply.".gray);
 
           res.send(204);
           next();

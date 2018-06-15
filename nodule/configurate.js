@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const colors = require('colors');
 const timestamp = require('console-timestamp');
+const prompt = require('readline-sync');
 
 const Config = require('../models/configuration');
 const MainConf = require('../models/mainconf');

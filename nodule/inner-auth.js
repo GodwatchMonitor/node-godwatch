@@ -1,7 +1,6 @@
 const errors = require('restify-errors');
 const restify = require('restify-plugins');
 const mongoose = require('mongoose');
-const prompt = require('readline-sync');
 
 const sysMail = require('../nodule/sys-mail');
 const Bunyan = require('../nodule/bunyan');
@@ -13,21 +12,28 @@ const Config = require('../models/configuration');
 function checkAdminPassword(password, username, cb){
 
   MainConf.findOne({ blip: 1 }, function(err, doc) {
+
     if(err){
-      Bunyan.error(err);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+      Bunyan.conclude(err);
+      return next(new errors.InternalError(err));
     }
 
     if(doc != null){ //does exist
+
       if(password == doc.password && username == doc.username){
+
         cb(false);
+
       } else {
+
         cb(true);
+
       }
+
     } else {
+
       cb(true);
+
     }
 
   });
@@ -52,19 +58,18 @@ const userAuth = function(req, res, next){
 
   User.findOne({ usernameplain: c_user }, function(err, doc){
 
-    if(err) {
-      Bunyan.error(err);
-      return next(
-        new errors.InvalidContentError(err)
-      );
+    if(err){
+      Bunyan.conclude(err);
+      return next(new errors.InternalError(err));
     }
+
     if(doc != null){
+
       UserPassword.findOne( {userid: doc.userid}, function(err, pwd){
-        if(err) {
-          Bunyan.error(err);
-          return next(
-            new errors.InvalidContentError(err)
-          );
+
+        if(err){
+          Bunyan.conclude(err);
+          return next(new errors.InternalError(err));
         }
 
         if(c_pass === pwd.key){
@@ -75,9 +80,12 @@ const userAuth = function(req, res, next){
         }
 
       });
+
     } else {
+
       res.send(401);
       return next(false);
+
     }
 
   });
@@ -85,6 +93,7 @@ const userAuth = function(req, res, next){
 }
 
 const adminAuth = function(req, res, next){
+
   res.header('WWW-Authenticate','Basic realm="API Docs"');
 
   if (
@@ -97,12 +106,21 @@ const adminAuth = function(req, res, next){
   }
 
   checkAdminPassword(req.authorization.basic.password, req.authorization.basic.username, function(err,data){
-    if (err){
+
+    if(err){
+
       res.send(401);
+
+      Bunyan.notify("INVALID AUTHENTICATION ".red + "on URL ".gray + req.href().cyan + " from ".gray + req.connection.remoteAddress.cyan);
+
       return next(false);
+
     }
+
     else return next();
+
   });
+
 };
 
 module.exports = {userAuth, adminAuth}
