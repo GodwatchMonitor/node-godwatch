@@ -48,6 +48,14 @@ const ClientSchema = new mongoose.Schema(
     version: {
       type: Number,
       required: false,
+    },
+    averagereport: {
+      type: Number,
+      required: false,
+    },
+    fluctuation: {
+      type: Number,
+      required: false,
     }
   },
   { minimize: false }

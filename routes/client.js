@@ -413,7 +413,7 @@ module.exports = function(server) {
 
     Bunyan.begin('REPORT'.green + ' client '.yellow + req.params.name.cyan + ' from '.gray + req.connection.remoteAddress.cyan);
 
-    let date = 'YYYY-MM-DDThh:mm:ss'.timestamp;
+    let date = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
 
     Bunyan.tell("Checking if the client exists...".gray);
 
@@ -532,7 +532,7 @@ module.exports = function(server) {
         return next(new errors.InternalError(err.message));
       }
 
-      var filestream = fs.createReadStream('./static/client'+String(conf.currentversion)+'.exe');
+      var filestream = fs.createReadStream('./static/client'+String(conf.clientversion)+'.exe');
 
       filestream.pipe(res);
 
