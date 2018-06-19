@@ -444,19 +444,61 @@ module.exports = function(server) {
 
         }
 
-        if(doc.missing){
+        Bunyan.tell("Gathering stats...".gray);
 
-          Reporting.checkClient(doc.cid);
+        let stats = {
+          timesreported: doc.timesreported,
+          averagereport: doc.averagereport,
+          fluctuation: doc.fluctuation,
+          lastreportoffset: doc.lastreportoffset,
+          interval: doc.interval,
+        }
 
-          Bunyan.tell("Client was previously missing, manually performed check.".gray);
+        let date = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
+        let datereported = doc.datereported;
+
+        let ct = Reporting.date_difference(date.slice(0,-4), datereported.slice(0,-4), date.slice(-3), datereported.slice(-3)); //Difference in milleseconds. Should equal the interval (i.e. 15000)
+
+        let fluctuation = ct - stats.lastreportoffset; //The difference in absolute time.
+
+        if(Math.abs(fluctuation) > Math.abs(stats.fluctuation) && stats.timesreported > 0){
+          stats.fluctuation = fluctuation;
+        }
+
+        if(stats.timesreported > 0){
+
+          stats.averagereport = ((stats.averagereport * stats.timesreported) + (stats.interval + fluctuation)) / (stats.timesreported + 1);
+
+        } else {
+
+          stats.averagereport = stats.interval;
 
         }
 
-        res.send(200, doc);
+        stats.timesreported += 1;
 
-        Bunyan.succeed()
+        stats.lastreportoffset = ct;
 
-        next();
+        Client.findOneAndUpdate({ cid: doc.cid }, { $set: stats }, function(err, ndoc){
+
+          Bunyan.tell("Successfully gathered stats.".gray);
+          Bunyan.tell("Times Reported: ".gray + String(stats.timesreported).cyan + " | Average Report: ".gray + String(stats.averagereport).cyan + " | Fluctuation: ".gray + String(fluctuation).cyan + " | Max Fluctuation: ".gray + String(stats.fluctuation).cyan);
+
+          if(doc.missing){
+
+            Reporting.checkClient(doc.cid);
+
+            Bunyan.tell("Client was previously missing, manually performed check.".gray);
+
+          }
+
+          res.send(200, doc);
+
+          Bunyan.succeed()
+
+          next();
+
+        });
 
       }
 

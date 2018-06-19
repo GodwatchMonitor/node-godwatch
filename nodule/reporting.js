@@ -64,7 +64,7 @@ function checkClient(cid){
 
       if(client.enabled){
 
-        Bunyan.begin("CHECK ".green + "client ".yellow + client.name.cyan + " at interval " + String(client.interval).cyan);
+        Bunyan.begin("CHECK ".green + "client ".yellow + client.name.cyan + " at interval ".gray + String(client.interval).cyan);
 
         let date = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
         let datereported = client.datereported;
@@ -181,7 +181,7 @@ function initialize(){
 
       if(client.enabled){
 
-        Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1, fluctuation: 0, averagereport: client.interval }, function(err, clinew){
+        Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1, timesreported: 0, fluctuation: 0, averagereport: client.interval, lastreportoffset: 0 }, function(err, clinew){
 
           if(err){
             Bunyan.conclude("ERROR: ".red + err.message.gray);

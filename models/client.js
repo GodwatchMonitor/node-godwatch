@@ -37,6 +37,10 @@ const ClientSchema = new mongoose.Schema(
       type: Number,
       required: false,
     },
+    timesreported: {
+      type: Number,
+      required: false,
+    },
     missing: {
       type: Boolean,
       required: true,
@@ -46,6 +50,10 @@ const ClientSchema = new mongoose.Schema(
       required: true,
     },
     version: {
+      type: Number,
+      required: false,
+    },
+    lastreportoffset: {
       type: Number,
       required: false,
     },
