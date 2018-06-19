@@ -2,8 +2,10 @@
 db/*
 ssl/*
 logs/*
+static/*
 
 # Keep .gitkeep
 !db/.gitkeep
 !ssl/.gitkeep
 !logs/.gitkeep
+!static/.gitkeep
