@@ -195,9 +195,9 @@ function initialize(){
 
           } else {
 
-            timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
+            timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval+(i*10));
 
-            Bunyan.tell("Initialized ".gray + client.name.cyan + " at interval ".gray + String(client.interval).cyan);
+            Bunyan.tell("Initialized ".gray + client.name.cyan + " at interval ".gray + String(client.interval+(i*10)).cyan);
 
             callback();
 

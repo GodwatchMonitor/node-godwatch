@@ -64,6 +64,10 @@ const ClientSchema = new mongoose.Schema(
     fluctuation: {
       type: Number,
       required: false,
+    },
+    recipients: {
+      type: [Number],
+      required: false,
     }
   },
   { minimize: false }

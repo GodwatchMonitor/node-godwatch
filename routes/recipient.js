@@ -27,33 +27,75 @@ module.exports = function(server) {
 
     let data = req.body || {};
 
-    Bunyan.tell('Assigning data and saving entry...'.gray);
-
-    let recip = new Recipient(data);
-
-    recip.save(function(err){
+    Recipient.findOne({ address: data.address }, function(err, addressexists){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(new errors.InternalError(err.message));
       }
 
-      Bunyan.tell("Save recipient successfull, adding the rid to the configuration...".gray);
+      if(!addressexists){
 
-      Configurate.addConfigRecipients(recip.rid, function(err){
+        Recipient.findOne({ name: data.name }, function(err, nameexists){
 
-        if(err){
-          Bunyan.conclude("ERROR: ".red + err.message.gray);
-          return next(new errors.InternalError(err.message));
-        }
+          if(err){
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
+            return next(new errors.InternalError(err.message));
+          }
 
-        res.send(201, recip);
+          if(!nameexists){
 
-        Bunyan.succeed("Name: ".gray + recip.name.cyan + " | Address: ".gray + recip.address.cyan);
+            Bunyan.tell('Assigning data and saving entry...'.gray);
+
+            let recip = new Recipient(data);
+
+            recip.save(function(err){
+
+              if(err){
+                Bunyan.conclude("ERROR: ".red + err.message.gray);
+                return next(new errors.InternalError(err.message));
+              }
+
+              Bunyan.tell("Save recipient successfull, adding the rid to the configuration...".gray);
+
+              Configurate.addConfigRecipients(recip.rid, function(err){
+
+                if(err){
+                  Bunyan.conclude("ERROR: ".red + err.message.gray);
+                  return next(new errors.InternalError(err.message));
+                }
+
+                res.send(201, recip);
+
+                Bunyan.succeed("Name: ".gray + recip.name.cyan + " | Address: ".gray + recip.address.cyan);
+
+                next();
+
+              });
+
+            });
+
+          } else {
+
+            res.send(400);
+
+            Bunyan.fail("Name already exists.".red);
+
+            next();
+
+          }
+
+        });
+
+      } else {
+
+        res.send(400);
+
+        Bunyan.fail("Address already exists.".red);
 
         next();
 
-      });
+      }
 
     });
 
