@@ -459,7 +459,7 @@ module.exports = function(server) {
 
         let ct = Reporting.date_difference(date.slice(0,-4), datereported.slice(0,-4), date.slice(-3), datereported.slice(-3)); //Difference in milleseconds. Should equal the interval (i.e. 15000)
 
-        let fluctuation = ct - stats.lastreportoffset; //The difference in absolute time.
+        let fluctuation = ct - doc.interval//stats.lastreportoffset; //The difference in absolute time.
 
         if(Math.abs(fluctuation) > Math.abs(stats.fluctuation) && stats.timesreported > 0){
           stats.fluctuation = fluctuation;
