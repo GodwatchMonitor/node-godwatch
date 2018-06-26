@@ -472,12 +472,12 @@ module.exports = function(server) {
         } else {
 
           stats.averagereport = stats.interval;
+          stats.lastreportoffset = ct;
 
         }
 
         stats.timesreported += 1;
 
-        stats.lastreportoffset = ct;
 
         Client.findOneAndUpdate({ cid: doc.cid }, { $set: stats }, function(err, ndoc){
 
