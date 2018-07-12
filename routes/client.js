@@ -48,6 +48,12 @@ module.exports = function(server) {
         cli.timesmissing = 0;
         cli.ipaddr = "None";
         cli.enabled = false;
+        cli.missing = false;
+        cli.timesmissing = -1;
+        cli.timesreported = 0;
+        cli.fluctuation = 0;
+        cli.averagereport = doc.interval;
+        cli.lastreportoffset = 0;
 
         Bunyan.tell("Saving client entry...".gray);
 
@@ -129,7 +135,11 @@ module.exports = function(server) {
         cli.ipaddr = "None";
         cli.enabled = false;
         cli.missing = false;
-        cli.enabled = false;
+        cli.timesmissing = -1;
+        cli.timesreported = 0;
+        cli.fluctuation = 0;
+        cli.averagereport = doc.interval;
+        cli.lastreportoffset = 0;
 
         Bunyan.tell("Saving client entry...".gray);
 
@@ -413,7 +423,7 @@ module.exports = function(server) {
 
     Bunyan.begin('REPORT'.green + ' client '.yellow + req.params.name.cyan + ' from '.gray + req.connection.remoteAddress.cyan);
 
-    let date = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
+    var date = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
 
     Bunyan.tell("Checking if the client exists...".gray);
 
@@ -454,30 +464,41 @@ module.exports = function(server) {
           interval: doc.interval,
         }
 
-        let date = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
         let datereported = doc.datereported;
 
         let ct = Reporting.date_difference(date.slice(0,-4), datereported.slice(0,-4), date.slice(-3), datereported.slice(-3)); //Difference in milleseconds. Should equal the interval (i.e. 15000)
+        console.log(date, datereported);
 
         let fluctuation = ct - doc.interval//stats.lastreportoffset; //The difference in absolute time.
 
-        if(Math.abs(fluctuation) > Math.abs(stats.fluctuation) && stats.timesreported > 0){
-          stats.fluctuation = fluctuation;
+        if(doc.enabled){
+
+          if(stats.timesreported > 0){
+
+            if(Math.abs(fluctuation) > Math.abs(stats.fluctuation) && stats.timesreported > 0){
+              stats.fluctuation = fluctuation;
+            }
+
+            stats.averagereport = ((stats.averagereport * stats.timesreported) + (stats.interval + fluctuation)) / (stats.timesreported + 1);
+
+          } else {
+
+            stats.averagereport = stats.interval;
+            stats.lastreportoffset = ct;
+
+          }
+
+          stats.timesreported += 1;
+
         }
 
-        if(stats.timesreported > 0){
-
-          stats.averagereport = ((stats.averagereport * stats.timesreported) + (stats.interval + fluctuation)) / (stats.timesreported + 1);
-
-        } else {
-
-          stats.averagereport = stats.interval;
-          stats.lastreportoffset = ct;
-
+        if(doc.missing){
+          stats.timesmissing = -1;
+          statsstats.timesreported = 0;
+          stats.fluctuation = 0;
+          stats.averagereport = doc.interval;
+          stats.lastreportoffset = 0;
         }
-
-        stats.timesreported += 1;
-
 
         Client.findOneAndUpdate({ cid: doc.cid }, { $set: stats }, function(err, ndoc){
 
