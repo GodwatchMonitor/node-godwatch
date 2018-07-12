@@ -494,7 +494,7 @@ module.exports = function(server) {
 
         if(doc.missing){
           stats.timesmissing = -1;
-          statsstats.timesreported = 0;
+          stats.timesreported = 0;
           stats.fluctuation = 0;
           stats.averagereport = doc.interval;
           stats.lastreportoffset = 0;
