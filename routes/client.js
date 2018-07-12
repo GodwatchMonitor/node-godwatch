@@ -138,7 +138,7 @@ module.exports = function(server) {
         cli.timesmissing = -1;
         cli.timesreported = 0;
         cli.fluctuation = 0;
-        cli.averagereport = doc.interval;
+        cli.averagereport = cli.interval;
         cli.lastreportoffset = 0;
 
         Bunyan.tell("Saving client entry...".gray);
