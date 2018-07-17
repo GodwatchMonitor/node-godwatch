@@ -22,6 +22,7 @@ function date_difference(date1, date2, mm1, mm2){
 function addTimer(cid, interval){
 
   timers[String(cid)] = setTimeout(function() { checkClient(cid); }, interval);
+  timers[String(cid)].offset = 0;
 
 }
 
@@ -43,6 +44,8 @@ function resetAllTimers(){
 }
 
 function checkClient(cid){
+
+  let start = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
 
   Client.findOne({ cid: cid }, function(err, client){
 
@@ -69,7 +72,7 @@ function checkClient(cid){
         let date = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
         let datereported = client.datereported;
 
-        let current_interval = timers[client.cid]._idleTimeout;
+        let current_interval = timers[client.cid]._idleTimeout + timers[client.cid].offset;
 
         Bunyan.tell("Comparing current time with last time reported...".gray);
 
@@ -146,7 +149,12 @@ function checkClient(cid){
 
         clearTimeout(timers[String(client.cid)]);
 
-        timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval);
+        let end = 'YYYY-MM-DDThh:mm:ss:iii'.timestamp;
+
+        let off = date_difference(end.slice(0,-4), start.slice(0,-4), end.slice(-3), start.slice(-3));
+
+        timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval - off);
+        timers[String(client.cid)].offset = off;
 
         Bunyan.conclude("SUCCESS".green);
 
@@ -173,11 +181,7 @@ function initialize(){
       return new errors.InternalError(err.message);
     }
 
-    var i = 0;
-
-    async.each(docs, function(client, callback){
-
-      i += 1;
+    async.eachOf(docs, function(client, index, callback){
 
       if(client.enabled){
 
@@ -195,9 +199,10 @@ function initialize(){
 
           } else {
 
-            timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval+(i*10));
+            timers[String(client.cid)] = setTimeout(function() { checkClient(client.cid); }, client.interval+(index*10));
+            timers[String(client.cid)].offset = 0;
 
-            Bunyan.tell("Initialized ".gray + client.name.cyan + " at interval ".gray + String(client.interval+(i*10)).cyan);
+            Bunyan.tell("Initialized ".gray + client.name.cyan + " at interval ".gray + String(client.interval+(index*10)).cyan);
 
             callback();
 
