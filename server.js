@@ -14,6 +14,8 @@ const Reporting = require('./nodule/reporting');
 const SysMail = require('./nodule/sys-mail');
 const Configurate = require('./nodule/configurate');
 const Bunyan = require('./nodule/bunyan');
+const ps = require('ps-node');
+const child_process = require('child_process');
 
 const colors = require('colors');
 const timestamp = require('console-timestamp');
@@ -49,76 +51,112 @@ secureserver.use(restifyPlugins.fullResponse());
 secureserver.use(restifyPlugins.authorizationParser());
 
 Bunyan.init();
+serverStarted = false;
 
-figlet.text('node-godwatch', {
-    font: 'Doom',
-    horizontalLayout: 'default',
-    verticalLayout: 'default'
-}, function(err, data) {
-    if (err) {
-        Bunyan.log('Something went wrong...'.red, 0);
-        console.dir(err);
-        return;
+console.log("Killing all instances of mongod...");
+ps.lookup({command: 'mongod'}, (err, results) => {
+  if(err){
+    console.log("oops");
+  }
+  results.forEach(function(process){
+    if(process){
+      ps.kill(process.pid, function(err){
+        if(err){
+            console.log("oops");
+        } else {
+            console.log('Process has been killed!');
+            start_mongodb();
+        }
+      });
     }
-    Bunyan.log(data.green, 10);
-    Bunyan.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray, 10);
-
+  });
 });
 
-// Start Server, Connect to DB and Require Routes
-server.listen(config.port, () => {
-
-  Bunyan.log('\033c', 10);
-
-  //connect to mongodb
-  mongoose.Promise = global.Promise;
-  mongoose.connect(config.db.uri);
-  autoIncrement.initialize(mongoose.connection);
-
-  const db = mongoose.connection;
-
-  db.on('error', (err) => {
-    Bunyan.error(err);
-    process.exit(1);
+function start_mongodb(){
+  console.log("Starting mongod with path " + __dirname + "/db");
+  child_process.exec('mongod --dbpath ' + __dirname + '/db', (e, out, err) => {
+    if(e){
+      return;
+    }
   });
 
-  db.once('open', () => {
+  setTimeout(start_server, 5000);
+}
 
-    route66.initializeRoutes(server);
+function start_server(){
 
-    Configurate.checkSetup(function(err){
+  serverStarted = true;
 
-      if(!err){
-
-        Bunyan.notify('Server is listening on port ' + config.port, 0);
-
-        Reporting.initialize();
-
-        /*
-        secureserver.listen(config.secureport, () => {
-          //connect to mongodb
-          mongoose.Promise = global.Promise;
-          mongoose.connect(config.db.uri);
-          autoIncrement.initialize(mongoose.connection);
-
-          const db = mongoose.connection;
-
-          db.on('error', (err) => {
-            console.error(err);
-            process.exit(1);
-          });
-
-          db.once('open', () => {
-            route66.initializeRoutes(secureserver);
-            Bunyan.notify('Secure Server is listening on port ' + config.secureport);
-          });
-
-        });*/
-
+  figlet.text('node-godwatch', {
+      font: 'Doom',
+      horizontalLayout: 'default',
+      verticalLayout: 'default'
+  }, function(err, data) {
+      if (err) {
+          Bunyan.log('Something went wrong...'.red, 0);
+          console.dir(err);
+          return;
       }
+      Bunyan.log(data.green, 10);
+      Bunyan.log("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n".gray, 10);
+
+  });
+
+  // Start Server, Connect to DB and Require Routes
+  server.listen(config.port, () => {
+
+    Bunyan.log('\033c', 10);
+
+    //connect to mongodb
+    mongoose.Promise = global.Promise;
+    mongoose.connect(config.db.uri);
+    autoIncrement.initialize(mongoose.connection);
+
+    const db = mongoose.connection;
+
+    db.on('error', (err) => {
+      Bunyan.error(err);
+      process.exit(1);
+    });
+
+    db.once('open', () => {
+
+      route66.initializeRoutes(server);
+
+      Configurate.checkSetup(function(err){
+
+        if(!err){
+
+          Bunyan.notify('Server is listening on port ' + config.port, 0);
+
+          Reporting.initialize();
+
+          /*
+          secureserver.listen(config.secureport, () => {
+            //connect to mongodb
+            mongoose.Promise = global.Promise;
+            mongoose.connect(config.db.uri);
+            autoIncrement.initialize(mongoose.connection);
+
+            const db = mongoose.connection;
+
+            db.on('error', (err) => {
+              console.error(err);
+              process.exit(1);
+            });
+
+            db.once('open', () => {
+              route66.initializeRoutes(secureserver);
+              Bunyan.notify('Secure Server is listening on port ' + config.secureport);
+            });
+
+          });*/
+
+        }
+
+      });
 
     });
 
   });
-
-});
+}
