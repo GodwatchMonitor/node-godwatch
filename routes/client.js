@@ -583,7 +583,7 @@ module.exports = function(server) {
 
     Bunyan.begin('EXE '.green + 'request from '.gray + req.connection.remoteAddress.cyan);
 
-    Bunyan.tell("Retriving file and writing to response...".gray);
+    Bunyan.tell("Retreiving file and writing to response...".gray);
 
     res.setHeader('Content-disposition', 'attachment; filename=newver.exe');
 

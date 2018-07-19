@@ -58,18 +58,22 @@ ps.lookup({command: 'mongod'}, (err, results) => {
   if(err){
     console.log("oops");
   }
-  results.forEach(function(process){
-    if(process){
-      ps.kill(process.pid, function(err){
-        if(err){
-            console.log("oops");
-        } else {
-            console.log('Process has been killed!');
-            start_mongodb();
-        }
-      });
-    }
-  });
+  if(results.length > 1){
+    results.forEach(function(process){
+      if(process){
+        ps.kill(process.pid, function(err){
+          if(err){
+              console.log("oops");
+          } else {
+              console.log('Process has been killed!');
+              start_mongodb();
+          }
+        });
+      }
+    });
+  } else {
+    start_mongodb();
+  }
 });
 
 function start_mongodb(){

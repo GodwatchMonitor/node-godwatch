@@ -68,6 +68,11 @@ const ClientSchema = new mongoose.Schema(
     recipients: {
       type: [Number],
       required: false,
+    },
+    group: {
+      type: String,
+      required: false,
+      default: 'default'
     }
   },
   { minimize: false }
