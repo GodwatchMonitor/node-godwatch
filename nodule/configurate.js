@@ -118,14 +118,14 @@ function getConfig(callback){
       return next(new errors.InternalError(err.message.red));
     }
 
-    Config.findOne({ cid: mc.currentconfig }, function(err, doc){
+    Config.findOne({ cid: mc.currentconfig }, function(err, config){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
         return next(new errors.InternalError(err.message.red));
       }
 
-      callback(err, doc);
+      callback(err, config);
 
     });
 

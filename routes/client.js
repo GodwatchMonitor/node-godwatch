@@ -427,7 +427,7 @@ module.exports = function(server) {
 
     Bunyan.tell("Checking if the client exists...".gray);
 
-    Client.findOneAndUpdate({ name: req.params.name }, { datereported: date, ipaddr: req.body.ip, enabled: true }, function(err, doc){
+    Client.findOneAndUpdate({ name: req.params.name }, { datereported: date, ipaddr: req.body.ip, enabled: true, publicip: req.connection.remoteAddress }, function(err, doc){
 
       if(err){
         Bunyan.conclude("ERROR: ".red + err.message.gray);
@@ -553,24 +553,15 @@ module.exports = function(server) {
 
         Bunyan.tell("Client exists, getting latest version number...".gray);
 
-        Configurate.getConfig(function(err, conf){
+        doc.version = server.config.clientversion;
 
-          if(err){
-            Bunyan.conclude("ERROR: ".red + err.message.gray);
-            return next(new errors.InternalError(err.message));
-          }
+        Bunyan.tell("Set latest version number to ".gray + String(doc.version).cyan);
 
-          doc.version = conf.clientversion;
+        res.send(200, doc);
 
-          Bunyan.tell("Set latest version number to ".gray + String(doc.version).cyan);
+        Bunyan.succeed()
 
-          res.send(200, doc);
-
-          Bunyan.succeed()
-
-          next();
-
-        });
+        next();
 
       }
 
@@ -587,22 +578,13 @@ module.exports = function(server) {
 
     res.setHeader('Content-disposition', 'attachment; filename=newver.exe');
 
-    Configurate.getConfig(function(err, conf){
+    var filestream = fs.createReadStream('./static/client'+String(server.config.clientversion)+'.exe');
 
-      if(err){
-        Bunyan.conclude("ERROR: ".red + err.message.gray);
-        return next(new errors.InternalError(err.message));
-      }
+    filestream.pipe(res);
 
-      var filestream = fs.createReadStream('./static/client'+String(conf.clientversion)+'.exe');
+    Bunyan.succeed();
 
-      filestream.pipe(res);
-
-      Bunyan.succeed()
-
-      next();
-
-    });
+    next();
 
   });
 

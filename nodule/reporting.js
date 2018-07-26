@@ -83,10 +83,12 @@ function checkClient(cid){
 
           Bunyan.tell("Client has not reported in ".gray + String(dif).cyan + " milliseconds.".gray);
 
+          // If the client is missing
           if(dif > current_interval*client.tolerance){
 
             Bunyan.tell("Client has not reported in the specified time frame (".gray + String(current_interval).gray + ").".gray);
 
+            // If the client
             if(client.timesmissing >= 0){
 
               Bunyan.tell("ALERT: Client is missing. It has either lost network connectivity, lost power, or had the Godwatch Client exited.".red);
@@ -99,7 +101,7 @@ function checkClient(cid){
 
                   Bunyan.tell("Server is online. Checking remote network...".gray);
 
-                  Client.apiQuery({ ipaddr: client.ipaddr }, function(err, clientsonnet){
+                  Client.apiQuery({ publicip: client.publicip }, function(err, clientsonnet){
 
                     if(err){
                       Bunyan.conclude("ERROR: ".red + err.message.gray);
@@ -146,6 +148,7 @@ function checkClient(cid){
                 } else {
 
                   Bunyan.tell("This server seems to have lost internet connection, will not send alert.".gray);
+                  resetTimesMissing();
 
                 }
 
@@ -177,6 +180,7 @@ function checkClient(cid){
 
           }
 
+          // If we are missing and we weren't before
           if(dif > current_interval*client.tolerance || client.timesmissing == -1){
 
             ndata.timesmissing = client.timesmissing+1;
@@ -217,6 +221,64 @@ function checkClient(cid){
           Bunyan.conclude("FAILURE: ".red + "Client is not enabled.".gray);
 
         }
+
+      }
+
+    });
+
+  });
+
+}
+
+function resetTimesMissing(){
+
+  Client.apiQuery({}, function(err, docs){
+
+    if(err){
+      Bunyan.conclude("ERROR: ".red + err.message.gray);
+      return new errors.InternalError(err.message);
+    }
+
+    async.eachOf(docs, function(client, index, callback){
+
+      if(client.enabled){
+
+        Client.findOneAndUpdate({ cid: client.cid }, { timesmissing: -1 }, function(err, clinew){
+
+          if(err){
+            Bunyan.conclude("ERROR: ".red + err.message.gray);
+            return new errors.InternalError(err.message);
+          }
+
+          if(!clinew){
+
+            Bunyan.fail("Client does not exist.".gray);
+            return new errors.ResourceNotFoundError('The resource you requested could not be found.');
+
+          } else {
+
+            callback();
+
+          }
+
+        });
+
+      } else {
+
+        callback();
+
+      }
+
+    }, function(err){
+
+      if(err){
+
+        Bunyan.fail(err.message.gray);
+        return new errors.InternalError('Unknown error.');
+
+      } else {
+
+        Bunyan.conclude("SUCCESS: ".green + String(docs.length).gray + " stats reset.".gray);
 
       }
 
@@ -291,4 +353,4 @@ function initialize(){
 
 }
 
-module.exports = {initialize, resetAllTimers, checkClient, date_difference, addTimer, removeTimer}
+module.exports = {initialize, resetTimesMissing, resetAllTimers, checkClient, date_difference, addTimer, removeTimer}

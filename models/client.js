@@ -73,6 +73,10 @@ const ClientSchema = new mongoose.Schema(
       type: String,
       required: false,
       default: 'default'
+    },
+    publicip: {
+      type: String,
+      required: false
     }
   },
   { minimize: false }

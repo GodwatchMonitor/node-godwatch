@@ -135,26 +135,9 @@ function start_server(){
 
           Reporting.initialize();
 
-          /*
-          secureserver.listen(config.secureport, () => {
-            //connect to mongodb
-            mongoose.Promise = global.Promise;
-            mongoose.connect(config.db.uri);
-            autoIncrement.initialize(mongoose.connection);
-
-            const db = mongoose.connection;
-
-            db.on('error', (err) => {
-              console.error(err);
-              process.exit(1);
-            });
-
-            db.once('open', () => {
-              route66.initializeRoutes(secureserver);
-              Bunyan.notify('Secure Server is listening on port ' + config.secureport);
-            });
-
-          });*/
+          Configurate.getConfig((err, config) => {
+            server.config = config;
+          });
 
         }
 
